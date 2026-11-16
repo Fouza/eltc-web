@@ -1,0 +1,26 @@
+@use 'variables' as *;
+
+.backdrop {
+  position: fixed; inset: 0; z-index: 1050; background: rgba(16, 24, 40, 0.45); backdrop-filter: blur(3px);
+  display: flex; align-items: flex-start; justify-content: center; padding: 6vh 16px 16px; overflow-y: auto;
+  animation: fade 0.15s ease-out;
+}
+.modal {
+  background: #fff; border-radius: 20px; box-shadow: $shadow-lg; width: 100%; display: flex; flex-direction: column;
+  max-height: calc(100vh - 8vh - 16px); animation: pop 0.18s ease-out;
+}
+.sm { max-width: 420px; }
+.md { max-width: 560px; }
+.lg { max-width: 780px; }
+.xl { max-width: 1040px; }
+.header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 22px 24px 4px; }
+.title { font-size: 18px; font-weight: 700; margin: 0; }
+.subtitle { color: $muted; font-size: 13px; margin-top: 4px; }
+.close {
+  border: none; background: $line-2; color: $muted; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  &:hover { background: $line; color: $ink; }
+}
+.body { padding: 18px 24px; overflow-y: auto; }
+.footer { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px 22px; border-top: 1px solid $line-2; }
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } }

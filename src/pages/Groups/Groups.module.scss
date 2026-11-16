@@ -1,0 +1,26 @@
+@use 'variables' as *;
+
+.groupCard {
+  background: #fff; border-radius: $radius-lg; box-shadow: $shadow; padding: 18px; height: 100%; cursor: pointer; position: relative; overflow: hidden;
+  border: 1px solid rgba(234, 236, 240, 0.7); transition: transform 0.15s, box-shadow 0.15s;
+  &::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c); }
+  &:hover { transform: translateY(-2px); box-shadow: $shadow-lg; }
+}
+.groupName { font-weight: 800; font-size: 16px; color: $ink; }
+.level {
+  display: inline-block; margin-top: 10px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px;
+  color: var(--c); background: color-mix(in srgb, var(--c) 10%, white);
+}
+.facts { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; font-size: 13px; color: $ink-2; span { display: flex; gap: 8px; align-items: center; } svg { color: $subtle; flex-shrink: 0; } }
+.infoGrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;
+  > div { display: flex; flex-direction: column; gap: 3px; }
+  span { color: $muted; font-size: 12.5px; font-weight: 600; display: inline-flex; gap: 6px; align-items: center; }
+  b { font-size: 14px; color: $ink; }
+  small { color: $subtle; }
+}
+.cell { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; font-size: 11px; font-weight: 700; color: $subtle; background: $line-2; }
+.present { background: $green-50; color: #027a48; }
+.absent { background: $red; color: #fff; }
+.late { background: $amber-50; color: #b54708; }
+.excused { background: $blue-50; color: $blue; }

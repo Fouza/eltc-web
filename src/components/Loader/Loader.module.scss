@@ -1,0 +1,14 @@
+@use 'variables' as *;
+
+.wrap { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 40px; color: $muted; }
+.full { min-height: 60vh; }
+.spinner {
+  width: 26px; height: 26px; border-radius: 50%; border: 3px solid $blue-100; border-top-color: $blue; animation: spin 0.8s linear infinite;
+}
+.label { font-size: 13px; font-weight: 500; }
+.skeleton {
+  display: block; border-radius: 6px;
+  background: linear-gradient(90deg, $line-2 25%, #f9fafb 50%, $line-2 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes shimmer { to { background-position: -200% 0; } }

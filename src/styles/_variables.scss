@@ -1,0 +1,41 @@
+// ELTC design tokens. School colours: blue #064CA5 and white, with a purple gradient accent.
+$blue: #064CA5;
+$blue-700: #043b82;
+$blue-50: #eef4fd;
+$blue-100: #dbe7fa;
+$purple: #7b3fe4;
+$purple-50: #f3edfd;
+$gradient: linear-gradient(135deg, #064CA5 0%, #4a43d8 55%, #7b3fe4 100%);
+$gradient-soft: linear-gradient(135deg, rgba(6, 76, 165, 0.08) 0%, rgba(123, 63, 228, 0.08) 100%);
+
+$green: #12b76a;
+$green-50: #ecfdf3;
+$amber: #f59e0b;
+$amber-50: #fffaeb;
+$red: #f04438;
+$red-50: #fef3f2;
+$cyan: #0ea5a4;
+$cyan-50: #ecfdfd;
+$pink: #ec4899;
+$pink-50: #fdf2f8;
+
+$ink: #101828;
+$ink-2: #344054;
+$muted: #667085;
+$subtle: #98a2b3;
+$line: #eaecf0;
+$line-2: #f2f4f7;
+$bg: #f5f7fb;
+$white: #fff;
+
+$radius-sm: 8px;
+$radius: 12px;
+$radius-lg: 18px;
+$shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05);
+$shadow: 0 1px 3px rgba(16, 24, 40, 0.04), 0 6px 20px rgba(16, 24, 40, 0.06);
+$shadow-lg: 0 12px 40px rgba(16, 24, 40, 0.12);
+$shadow-blue: 0 8px 20px rgba(6, 76, 165, 0.25);
+
+$sidebar-width: 256px;
+$topbar-height: 72px;
+$font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;

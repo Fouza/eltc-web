@@ -1,0 +1,16 @@
+@use 'variables' as *;
+
+.stack { position: fixed; right: 20px; bottom: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 40px)); }
+.toast {
+  display: flex; gap: 12px; align-items: flex-start; background: #fff; border-radius: 14px; box-shadow: $shadow-lg; padding: 14px 14px 14px 16px;
+  border: 1px solid $line; border-left: 4px solid var(--c); animation: slide 0.2s ease-out;
+}
+.success { --c: #{$green}; }
+.info { --c: #{$blue}; }
+.warning { --c: #{$amber}; }
+.danger { --c: #{$red}; }
+.icon { color: var(--c); flex-shrink: 0; margin-top: 1px; }
+.title { font-weight: 700; font-size: 13.5px; }
+.message { color: $muted; font-size: 12.5px; margin-top: 2px; }
+.close { border: none; background: none; color: $subtle; padding: 2px; &:hover { color: $ink; } }
+@keyframes slide { from { opacity: 0; transform: translateX(20px); } }

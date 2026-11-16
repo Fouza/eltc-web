@@ -1,0 +1,8 @@
+@use 'variables' as *;
+
+.empty { text-align: center; padding: 48px 16px; }
+.compact { padding: 24px 12px; }
+.icon { width: 52px; height: 52px; border-radius: 16px; display: inline-grid; place-items: center; background: $gradient-soft; color: $blue; margin-bottom: 12px; }
+.compact .icon { width: 40px; height: 40px; border-radius: 12px; }
+.title { font-weight: 700; color: $ink; }
+.message { color: $muted; font-size: 13px; margin-top: 4px; max-width: 380px; margin-inline: auto; }

@@ -1,0 +1,33 @@
+@use 'variables' as *;
+
+.wrap { display: grid; grid-template-columns: 1fr 1.1fr; min-height: 100vh; @media (max-width: 900px) { grid-template-columns: 1fr; } }
+.formSide { display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.form { width: 100%; max-width: 400px; }
+.logo { width: 52px; height: 52px; border-radius: 16px; background: $gradient; color: #fff; font-weight: 800; font-size: 24px; display: grid; place-items: center; box-shadow: $shadow-blue; margin-bottom: 28px; }
+.title { font-size: 30px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+.error { background: $red-50; color: #b42318; border: 1px solid #fecdca; border-radius: 10px; padding: 10px 12px; font-size: 13px; margin-bottom: 14px; font-weight: 500; }
+.inputIcon {
+  position: relative;
+  > svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: $subtle; }
+  input { padding-left: 40px; height: 46px; }
+}
+.eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: none; background: none; color: $subtle; padding: 6px; }
+.visual {
+  background: $gradient; margin: 14px; border-radius: 28px; position: relative; overflow: hidden; display: flex; align-items: center; padding: 56px;
+  &::before { content: ''; position: absolute; width: 480px; height: 480px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); right: -140px; top: -160px; }
+  &::after { content: ''; position: absolute; width: 320px; height: 320px; border-radius: 50%; background: rgba(255, 255, 255, 0.06); left: -100px; bottom: -120px; }
+  @media (max-width: 900px) { display: none; }
+}
+.visualInner { position: relative; z-index: 1; color: #fff; max-width: 520px; }
+.kicker { display: inline-block; background: rgba(255, 255, 255, 0.16); border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 12.5px; margin-bottom: 20px; }
+.visualTitle { color: #fff; font-size: 38px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; }
+.visualText { opacity: 0.85; font-size: 16px; margin-top: 14px; }
+.cards { display: flex; flex-direction: column; gap: 12px; margin-top: 36px; }
+.floatCard {
+  display: flex; align-items: center; gap: 14px; background: #fff; color: $ink; border-radius: 16px; padding: 14px 18px; box-shadow: $shadow-lg; width: fit-content;
+  svg { color: $blue; background: $blue-50; border-radius: 10px; padding: 8px; width: 36px; height: 36px; }
+  b { display: block; font-size: 14px; }
+  span { font-size: 12.5px; color: $muted; }
+  &:nth-child(2) { margin-left: 48px; svg { color: $purple; background: $purple-50; } }
+  &:nth-child(3) { margin-left: 16px; svg { color: $green; background: $green-50; } }
+}

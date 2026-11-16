@@ -1,0 +1,7 @@
+@use 'variables' as *;
+
+.wrap { position: relative; }
+.menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 1100; background: #fff; border: 1px solid $line; border-radius: 12px; box-shadow: $shadow-lg; padding: 4px; max-height: 300px; overflow-y: auto; }
+.item { display: flex; align-items: center; gap: 10px; width: 100%; border: none; background: none; padding: 7px 8px; border-radius: 8px; font-size: 13.5px; &:hover { background: $blue-50; } }
+.selected { display: flex; align-items: center; gap: 10px; border: 1px solid $blue-100; background: $blue-50; border-radius: 12px; padding: 8px 10px; }
+.clear { border: none; background: #fff; color: $muted; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; }

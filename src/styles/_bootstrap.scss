@@ -1,0 +1,31 @@
+// Bootstrap 5 from npm, themed with the school colours.
+@import 'variables';
+
+$primary: $blue;
+$secondary: $muted;
+$success: $green;
+$warning: $amber;
+$danger: $red;
+$info: $cyan;
+$body-bg: $bg;
+$body-color: $ink;
+$font-family-sans-serif: $font;
+$font-size-base: 0.875rem;
+$border-color: $line;
+$border-radius: $radius-sm;
+$border-radius-lg: $radius;
+$input-border-color: #d0d5dd;
+$input-focus-border-color: $blue;
+$input-focus-box-shadow: 0 0 0 4px rgba(6, 76, 165, 0.12);
+$input-padding-y: 0.55rem;
+$input-padding-x: 0.8rem;
+$input-placeholder-color: $subtle;
+$form-label-font-weight: 600;
+$form-label-font-size: 0.8rem;
+$form-label-color: $ink-2;
+$link-decoration: none;
+$headings-font-weight: 700;
+$headings-color: $ink;
+$enable-shadows: false;
+
+@import 'bootstrap/scss/bootstrap';

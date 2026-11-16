@@ -1,0 +1,29 @@
+@use 'variables' as *;
+
+.profileHead {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  background: #fff; border-radius: $radius-lg; box-shadow: $shadow; padding: 22px 24px; margin: -8px 0 16px;
+  position: relative; overflow: hidden;
+  &::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: $gradient; }
+}
+.name { font-size: 24px; font-weight: 800; margin: 0; letter-spacing: -0.02em; }
+.meta {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; color: $muted; font-size: 13px; margin-top: 6px;
+  span, a { display: inline-flex; align-items: center; gap: 5px; }
+  a { color: $muted; &:hover { color: $blue; } }
+}
+.mini {
+  display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 14px; box-shadow: $shadow; padding: 14px 16px;
+  svg { flex-shrink: 0; }
+  span { display: block; font-size: 12px; color: $muted; font-weight: 600; }
+  b { font-size: 18px; font-variant-numeric: tabular-nums; }
+}
+.miniDanger { background: $red-50; b { color: #b42318; } }
+.enrollGrid { margin-top: 12px; }
+.infoRow {
+  display: flex; gap: 12px; padding: 7px 0; border-bottom: 1px dashed $line-2; font-size: 13.5px;
+  &:last-child { border-bottom: none; }
+  > span { width: 130px; flex-shrink: 0; color: $muted; }
+  > div { color: $ink; font-weight: 500; min-width: 0; }
+}
+.faded { opacity: 0.7; }

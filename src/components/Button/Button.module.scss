@@ -1,0 +1,40 @@
+@use 'variables' as *;
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid transparent; border-radius: 10px; font-weight: 600; font-family: inherit;
+  white-space: nowrap; cursor: pointer; transition: transform 0.12s, box-shadow 0.15s, background 0.15s, opacity 0.15s;
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+  &:not(:disabled):active { transform: translateY(1px); }
+}
+.md { height: 40px; padding: 0 16px; font-size: 13.5px; }
+.sm { height: 32px; padding: 0 12px; font-size: 12.5px; border-radius: 8px; gap: 6px; }
+.lg { height: 48px; padding: 0 22px; font-size: 15px; border-radius: 12px; }
+.iconOnly { padding: 0; aspect-ratio: 1; }
+.block { width: 100%; }
+
+.primary {
+  background: $gradient; color: #fff; box-shadow: $shadow-blue;
+  &:not(:disabled):hover { box-shadow: 0 10px 24px rgba(74, 67, 216, 0.35); filter: brightness(1.05); }
+}
+.secondary {
+  background: #fff; color: $ink-2; border-color: #d0d5dd; box-shadow: $shadow-sm;
+  &:not(:disabled):hover { background: #f9fafb; color: $ink; }
+}
+.soft {
+  background: $blue-50; color: $blue;
+  &:not(:disabled):hover { background: $blue-100; }
+}
+.ghost {
+  background: transparent; color: $muted;
+  &:not(:disabled):hover { background: $line-2; color: $ink; }
+}
+.danger {
+  background: $red-50; color: $red; border-color: #fecdca;
+  &:not(:disabled):hover { background: #fee4e2; }
+}
+.spinner {
+  width: 15px; height: 15px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

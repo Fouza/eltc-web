@@ -1,0 +1,23 @@
+@use 'variables' as *;
+
+.scroll { overflow-x: auto; }
+.grid { display: grid; grid-template-columns: 64px repeat(7, minmax(130px, 1fr)); min-width: 980px; }
+.corner { border-bottom: 1px solid $line; }
+.dayHead { padding: 14px 10px; font-weight: 700; font-size: 13px; text-align: center; border-bottom: 1px solid $line; border-left: 1px solid $line-2; color: $ink-2; }
+.today { color: $blue; }
+.hours { display: flex; flex-direction: column; }
+.hour { height: var(--hour); font-size: 11px; color: $subtle; text-align: right; padding: 2px 8px 0 0; border-top: 1px solid $line-2; }
+.dayCol {
+  position: relative; border-left: 1px solid $line-2;
+  background-image: linear-gradient(to bottom, $line-2 1px, transparent 1px); background-size: 100% var(--hour);
+}
+.todayCol { background-color: rgba(6, 76, 165, 0.025); }
+.event {
+  position: absolute; border: none; text-align: left; border-radius: 10px; padding: 5px 8px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 1px; font-size: 11.5px; line-height: 1.25;
+  background: color-mix(in srgb, var(--c) 12%, white); color: color-mix(in srgb, var(--c) 80%, black);
+  border-left: 3px solid var(--c); box-shadow: 0 0 0 2px #fff;
+  b { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.85; }
+  &:hover { filter: brightness(0.97); z-index: 2; box-shadow: $shadow; }
+}
