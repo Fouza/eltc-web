@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Plus, X } from 'lucide-react';
 import { groupsApi } from '@api/endpoints';
 import { Button, Field, Modal } from '@components';
-import { toInputDate, money, fullName } from '@helpers/format';
+import { toInputDate, money, fullName, levelName } from '@helpers/format';
 import { toast } from '@helpers/toast';
-import { DAYS, WEEK_ORDER } from '@data/days';
+import { SESSIONS_PER_WEEK, checkSessions, sessionsFor, sessionsLabel } from '@data/sessions';
 import { GROUP_STATUS } from '@data/enums';
 
 const blank = (prefill = {}) => ({
-  name: '', program: '', levelNumber: 1, campus: '', teacher: '', room: '', capacity: 12, schedule: [{ day: 0, startTime: '18:00', endTime: '19:30' }],
+  name: '', program: '', levelNumber: 1, campus: '', teacher: '', room: '', capacity: 12, sessions: [],
   startDate: '', endDate: '', fee: '', status: 'planned', notes: '', ...prefill,
 });
 
-// Suggested name: "FR-A1" style from language code, audience and level.
-const suggestName = (program, level) =>
-  program ? `${program.language?.code?.toUpperCase() ?? ''}-${program.audience?.[0]?.toUpperCase() ?? ''}${level}` : '';
+// Suggested name: language - level, audience, sessions. "EN - A1 Adults Saturday Morning + Evening Tue", "FR - Bounce 2 Kids Friday Morning".
+export const suggestName = (program, level, sessions = []) => {
+  if (!program) return '';
+  const code = program.language?.code?.toUpperCase() ?? '';
+  return [`${code} - ${levelName(level, program)}`, program.audience === 'children' ? 'Kids' : 'Adults', sessionsLabel(sessions)].filter(Boolean).join(' ');
+};
 
 const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
   const { programs, campuses, teachers } = useSelector((s) => s.refs);
@@ -35,7 +37,24 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
   const program = programs.find((p) => p._id === f.program);
   const level = program?.levels.find((l) => l.number === Number(f.levelNumber));
   const campus = campuses.find((c) => c._id === f.campus);
-  const setSlot = (i, k, v) => set('schedule', f.schedule.map((s, j) => (j === i ? { ...s, [k]: k === 'day' ? Number(v) : v } : s)));
+  const audience = program?.audience ?? 'adults';
+  const need = SESSIONS_PER_WEEK[audience];
+  const sessionError = program ? checkSessions(f.sessions, audience) : null;
+
+  // The name follows program / level / sessions until the user types their own.
+  const autoName = (x) => suggestName(programs.find((p) => p._id === x.program), x.levelNumber, x.sessions);
+  const update = (patch) =>
+    setF((x) => {
+      const next = { ...x, ...patch };
+      return { ...next, name: !x.name || x.name === autoName(x) ? autoName(next) : x.name };
+    });
+  const toggleSession = (key) => {
+    const has = f.sessions.includes(key);
+    const day = sessionsFor(audience).find((s) => s.key === key)?.day;
+    // Picking a session replaces the one on the same day; kids keep only one session.
+    const others = need === 1 ? [] : f.sessions.filter((k) => sessionsFor(audience).find((s) => s.key === k)?.day !== day);
+    update({ sessions: has ? f.sessions.filter((k) => k !== key) : [...others, key].slice(-need) });
+  };
 
   // End date from the level duration.
   const onStart = (v) => {
@@ -51,7 +70,7 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
     setSaving(true);
     try {
       const data = { ...f, levelNumber: Number(f.levelNumber), capacity: Number(f.capacity), fee: f.fee === '' ? null : Number(f.fee), teacher: f.teacher || null, startDate: f.startDate || null, endDate: f.endDate || null };
-      delete data._id; delete data.level; delete data.roster; delete data.enrolledCount; delete data.sessions;
+      delete data._id; delete data.level; delete data.roster; delete data.enrolledCount; delete data.sessionsHeld; delete data.schedule;
       const saved = group ? await groupsApi.update(group._id, data) : await groupsApi.create(data);
       toast.success(group ? 'Group updated' : `Group ${saved.name} created`);
       onSaved?.(saved);
@@ -70,13 +89,13 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
       onClose={onClose}
       size="lg"
       title={group ? `Edit ${group.name}` : 'New group'}
-      subtitle="A group is one level of a program, at one campus, with a teacher and a weekly schedule."
-      footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button loading={saving} disabled={!f.name || !f.program || !f.campus} onClick={save}>Save group</Button></>}
+      subtitle="A group is one level of a program, at one campus, with a teacher and its weekly sessions."
+      footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button loading={saving} disabled={!f.name || !f.program || !f.campus || Boolean(sessionError)} onClick={save}>Save group</Button></>}
     >
       <div className="row">
         <div className="col-sm-6">
           <Field label="Program" required>
-            <select className="form-select" value={f.program} onChange={(e) => { const p = programs.find((x) => x._id === e.target.value); setF((x) => ({ ...x, program: e.target.value, name: x.name || suggestName(p, x.levelNumber) })); }}>
+            <select className="form-select" value={f.program} onChange={(e) => update({ program: e.target.value, levelNumber: 1, sessions: [] })}>
               <option value="">Choose…</option>
               {programs.filter((p) => p.active || p._id === f.program).map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
             </select>
@@ -84,14 +103,14 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
         </div>
         <div className="col-sm-6">
           <Field label="Level" required hint={level ? `${level.durationWeeks} weeks · ${level.hours} h · ${money(level.fee)}` : undefined}>
-            <select className="form-select" value={f.levelNumber} onChange={(e) => set('levelNumber', e.target.value)} disabled={!program}>
-              {(program?.levels ?? [{ number: 1, name: 'Level 1' }]).map((l) => <option key={l.number} value={l.number}>{l.name}</option>)}
+            <select className="form-select" value={f.levelNumber} onChange={(e) => update({ levelNumber: e.target.value })} disabled={!program}>
+              {(program?.levels ?? [{ number: 1, name: levelName(1) }]).map((l) => <option key={l.number} value={l.number}>{l.name}</option>)}
             </select>
           </Field>
         </div>
         <div className="col-sm-6">
-          <Field label="Group name" required hint="Short and recognisable, e.g. FR-A1 Evening">
-            <input className="form-control" value={f.name} onChange={(e) => set('name', e.target.value)} placeholder={suggestName(program, f.levelNumber) || 'FR-A1 Evening'} />
+          <Field label="Group name" required hint="Filled in from the level and sessions. You can change it.">
+            <input className="form-control" value={f.name} onChange={(e) => set('name', e.target.value)} placeholder={suggestName(program, f.levelNumber, f.sessions) || 'EN - A1 Adults Saturday Morning + Evening Tue'} />
           </Field>
         </div>
         <div className="col-sm-6">
@@ -121,20 +140,23 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
         </div>
         <div className="col-sm-3"><Field label="Seats"><input type="number" min="1" className="form-control" value={f.capacity} onChange={(e) => set('capacity', e.target.value)} /></Field></div>
       </div>
-      <Field label="Weekly schedule">
-        <div className="d-flex flex-column gap-2">
-          {f.schedule.map((s, i) => (
-            <div key={i} className="d-flex gap-2 align-items-center">
-              <select className="form-select" value={s.day} onChange={(e) => setSlot(i, 'day', e.target.value)} style={{ maxWidth: 170 }}>
-                {WEEK_ORDER.map((d) => <option key={d} value={d}>{DAYS[d]}</option>)}
-              </select>
-              <input type="time" className="form-control" value={s.startTime} onChange={(e) => setSlot(i, 'startTime', e.target.value)} style={{ maxWidth: 130 }} />
-              <span className="fg-subtle">→</span>
-              <input type="time" className="form-control" value={s.endTime} onChange={(e) => setSlot(i, 'endTime', e.target.value)} style={{ maxWidth: 130 }} />
-              <Button variant="ghost" size="sm" icon={X} onClick={() => set('schedule', f.schedule.filter((_, j) => j !== i))} aria-label="Remove" />
-            </div>
-          ))}
-          <div><Button variant="soft" size="sm" icon={Plus} onClick={() => set('schedule', [...f.schedule, { ...(f.schedule.at(-1) ?? { startTime: '18:00', endTime: '19:30' }), day: ((f.schedule.at(-1)?.day ?? 0) + 2) % 7 }])}>Add a day</Button></div>
+      <Field
+        label={`Sessions · ${audience === 'children' ? 'kids: 1 a week' : 'adults: 2 a week, on different days'}`}
+        required
+        hint={!program ? 'Choose the program first.' : f.sessions.length < need ? `Pick ${need - f.sessions.length} more.` : sessionError ?? undefined}
+      >
+        <div className="row g-2">
+          {(program ? sessionsFor(audience) : []).map((s) => {
+            const on = f.sessions.includes(s.key);
+            return (
+              <div key={s.key} className="col-sm-6 col-lg-3">
+                <label className={`d-flex gap-2 p-2 px-3 rounded-3 border h-100 cursor-pointer ${on ? 'border-primary bg-blue-50' : ''}`}>
+                  <input type={need === 1 ? 'radio' : 'checkbox'} name="session" className="form-check-input mt-1" checked={on} onChange={() => toggleSession(s.key)} />
+                  <div><div className="fw-700 fs-13">{s.label}</div><div className="fs-12 fg-muted">{s.startTime}–{s.endTime}</div></div>
+                </label>
+              </div>
+            );
+          })}
         </div>
       </Field>
       <div className="row">

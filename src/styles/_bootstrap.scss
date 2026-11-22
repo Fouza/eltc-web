@@ -1,31 +1,49 @@
 // Bootstrap 5 from npm, themed with the school colours.
+// Bootstrap runs colour functions on these, so they stay literal hex values (not the CSS variables from _variables).
+// Dark mode uses Bootstrap's own data-bs-theme="dark" support with the *-dark values below.
 @import 'variables';
 
-$primary: $blue;
-$secondary: $muted;
-$success: $green;
-$warning: $amber;
-$danger: $red;
-$info: $cyan;
-$body-bg: $bg;
-$body-color: $ink;
+// Bootstrap's own palette shares these names: give it the literal school colours.
+$blue: #064CA5;
+$purple: #7b3fe4;
+$green: #12b76a;
+$red: #f04438;
+$cyan: #0ea5a4;
+$pink: #ec4899;
+
+$primary: #064CA5;
+$secondary: #667085;
+$success: #12b76a;
+$warning: #f59e0b;
+$danger: #f04438;
+$info: #0ea5a4;
+$body-bg: #f5f7fb;
+$body-color: #101828;
+$body-bg-dark: #141a24;
+$body-color-dark: #f2f4f7;
+$body-secondary-color-dark: #98a2b3;
+$body-tertiary-bg-dark: #19202c;
+$border-color: #eaecf0;
+$border-color-dark: #283041;
 $font-family-sans-serif: $font;
 $font-size-base: 0.875rem;
-$border-color: $line;
 $border-radius: $radius-sm;
 $border-radius-lg: $radius;
-$input-border-color: #d0d5dd;
-$input-focus-border-color: $blue;
+$input-border-color: var(--input-border);
+$input-focus-border-color: #064CA5;
 $input-focus-box-shadow: 0 0 0 4px rgba(6, 76, 165, 0.12);
 $input-padding-y: 0.55rem;
 $input-padding-x: 0.8rem;
-$input-placeholder-color: $subtle;
+$input-placeholder-color: var(--subtle);
 $form-label-font-weight: 600;
 $form-label-font-size: 0.8rem;
-$form-label-color: $ink-2;
+$form-label-color: var(--ink-2);
 $link-decoration: none;
 $headings-font-weight: 700;
-$headings-color: $ink;
+$headings-color: var(--ink);
 $enable-shadows: false;
 
 @import 'bootstrap/scss/bootstrap';
+
+// Back to the theme tokens (CSS variables) for everything that follows.
+@import 'variables';

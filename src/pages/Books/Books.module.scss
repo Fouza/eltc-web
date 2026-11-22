@@ -1,0 +1,32 @@
+@use 'variables' as *;
+
+.card {
+  background: $surface; border-radius: $radius-lg; box-shadow: $shadow; border: 1px solid $line; padding: 16px; height: 100%;
+  display: flex; gap: 14px;
+}
+.inactive { opacity: 0.6; }
+.cover {
+  width: 72px; height: 96px; border-radius: 8px; flex-shrink: 0; object-fit: cover; background: $line-2; border: 1px solid $line;
+  display: grid; place-items: center; color: $subtle;
+}
+.title { font-weight: 800; color: $ink; line-height: 1.25; }
+.price { font-weight: 800; color: $blue; font-variant-numeric: tabular-nums; }
+.levels { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.stock { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; font-size: 12.5px; }
+.stockItem { display: inline-flex; gap: 4px; align-items: center; padding: 2px 8px; border-radius: 999px; background: $line-2; color: $ink-2; font-weight: 600; }
+.low { background: $amber-50; color: $amber-ink; }
+.out { background: $red-50; color: $red-ink; }
+.upload {
+  width: 120px; height: 160px; border-radius: 10px; border: 1.5px dashed $input-border; background: $surface-2; color: $muted;
+  display: grid; place-items: center; text-align: center; font-size: 12px; cursor: pointer; overflow: hidden; position: relative;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  &:hover { border-color: $blue; color: $blue; }
+}
+.levelRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px dashed $line-2; }
+.levelRow:last-child { border-bottom: none; }
+.programName { width: 170px; font-weight: 700; font-size: 13px; }
+.levelChip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; border: 1px solid $line; font-size: 12.5px; cursor: pointer; user-select: none;
+  input { margin: 0; }
+}
+.levelOn { border-color: $blue; background: $blue-50; color: $blue; font-weight: 600; }

@@ -7,10 +7,10 @@
 .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; }
 .blue { background: $blue-50; color: $blue; }
 .purple { background: $purple-50; color: $purple; }
-.green { background: $green-50; color: #027a48; }
-.amber { background: $amber-50; color: #b54708; }
-.red { background: $red-50; color: #b42318; }
-.cyan { background: $cyan-50; color: #0e7c7b; }
-.pink { background: $pink-50; color: #c11574; }
+.green { background: $green-50; color: $green-ink; }
+.amber { background: $amber-50; color: $amber-ink; }
+.red { background: $red-50; color: $red-ink; }
+.cyan { background: $cyan-50; color: $cyan-ink; }
+.pink { background: $pink-50; color: $pink-ink; }
 .gray { background: $line-2; color: $ink-2; }
-.custom { background: color-mix(in srgb, var(--c) 12%, white); color: color-mix(in srgb, var(--c) 85%, black); }
+.custom { background: color-mix(in srgb, var(--c) 12%, var(--surface)); color: color-mix(in srgb, var(--c), var(--mix-ink) var(--tint-ink)); }

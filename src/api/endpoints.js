@@ -26,6 +26,10 @@ const crud = (path) => ({
 export const campusesApi = crud('/campuses');
 export const languagesApi = crud('/languages');
 export const programsApi = crud('/programs');
+export const booksApi = {
+  ...crud('/books'),
+  stock: (id, data) => api.post(`/books/${id}/stock`, data),
+};
 export const teachersApi = crud('/teachers');
 
 export const groupsApi = {
@@ -64,6 +68,7 @@ export const invoicesApi = {
   create: (data) => api.post('/invoices', data),
   update: (id, data) => api.put(`/invoices/${id}`, data),
   cancel: (id) => api.post(`/invoices/${id}/cancel`),
+  handover: (id, handedOver) => api.post(`/invoices/${id}/handover`, { handedOver }),
 };
 
 export const paymentsApi = {

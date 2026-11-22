@@ -7,16 +7,20 @@ import {
   AlertCircle, CalendarCheck2, ClipboardCheck, Clock, GraduationCap, Layers, MapPin, Plus, Users, Wallet,
 } from 'lucide-react';
 import { dashboardApi } from '@api/endpoints';
-import { useApi, useCampus, useCan } from '@helpers/hooks';
-import { formatDate, fromNow, fullName, money, number, percent, formatDay } from '@helpers/format';
+import { useApi, useCampus, useCan, useGroupName } from '@helpers/hooks';
+import { formatDate, fromNow, fullName, money, number, percent, formatDay, formatMonth } from '@helpers/format';
 import { Avatar, Badge, Button, Card, EmptyState, Loader, ProgressBar, StatCard, StatusBadge } from '@components';
 import { CAN } from '@data/roles';
+import { useTheme } from '@helpers/theme';
 import { EXAM_TYPES, STUDENT_STATUS, AUDIENCES } from '@data/enums';
 import RecordPaymentModal from '@pages/Payments/RecordPaymentModal';
 import styles from './Dashboard.module.scss';
 
-const RECEIVED = '#064CA5';
-const BILLED = '#9B7BF0';
+// Chart colours per theme (SVG attributes can't read CSS variables).
+const CHART = {
+  light: { received: '#064CA5', billed: '#9B7BF0', grid: '#F2F4F7', tick: '#98A2B3', cursor: 'rgba(6,76,165,0.05)' },
+  dark: { received: '#4D8FF0', billed: '#A98BF5', grid: '#1D2330', tick: '#6C7689', cursor: 'rgba(110,168,254,0.08)' },
+};
 
 const greeting = () => {
   const h = new Date().getHours();
@@ -26,7 +30,7 @@ const greeting = () => {
 const RevenueTooltip = ({ active, payload, label }) =>
   active && payload?.length ? (
     <div className={styles.tooltip}>
-      <div className="fw-700 mb-1">{dayjs(`${label}-01`).format('MMMM YYYY')}</div>
+      <div className="fw-700 mb-1">{formatMonth(`${label}-01`)}</div>
       {payload.map((p) => (
         <div key={p.dataKey} className="d-flex align-items-center gap-2">
           <i className={styles.swatch} style={{ background: p.color }} /> {p.name}: <b className="ms-auto tabular">{money(p.value)}</b>
@@ -55,9 +59,11 @@ const BarList = ({ rows, total }) => (
 );
 
 const Dashboard = () => {
+  const chart = CHART[useTheme()];
   const navigate = useNavigate();
   const user = useSelector((s) => s.auth.user);
   const campus = useCampus();
+  const groupName = useGroupName();
   const canPay = useCan(CAN.recordPayments);
   const canRegister = useCan(CAN.manageStudents);
   const [paying, setPaying] = useState(false);
@@ -74,7 +80,7 @@ const Dashboard = () => {
     <>
       <div className={styles.hero}>
         <div>
-          <div className={styles.date}>{dayjs().format('dddd D MMMM YYYY')}</div>
+          <div className={styles.date}>{formatDate(new Date())}</div>
           <h1 className={styles.hello}>
             {greeting()}, {user?.firstName} 👋
           </h1>
@@ -118,18 +124,18 @@ const Dashboard = () => {
           <div className="col-xl-8">
             <Card title="Money collected vs billed" subtitle="Last 6 months · billed = installments falling due that month" className="h-100">
               <div className={styles.legend}>
-                <span><i className={styles.swatch} style={{ background: RECEIVED }} /> Collected</span>
-                <span><i className={styles.swatch} style={{ background: BILLED }} /> Billed</span>
+                <span><i className={styles.swatch} style={{ background: chart.received }} /> Collected</span>
+                <span><i className={styles.swatch} style={{ background: chart.billed }} /> Billed</span>
               </div>
               <div style={{ height: 260 }}>
                 <ResponsiveContainer>
                   <BarChart data={f.revenueByMonth} barGap={2} barCategoryGap="28%" margin={{ top: 8, right: 4, left: 0, bottom: 0 }}>
-                    <CartesianGrid vertical={false} stroke="#F2F4F7" />
-                    <XAxis dataKey="month" tickFormatter={(m) => dayjs(`${m}-01`).format('MMM')} tickLine={false} axisLine={false} tick={{ fill: '#98A2B3', fontSize: 12 }} />
-                    <YAxis tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} tickLine={false} axisLine={false} tick={{ fill: '#98A2B3', fontSize: 12 }} width={44} />
-                    <Tooltip content={<RevenueTooltip />} cursor={{ fill: 'rgba(6,76,165,0.05)' }} />
-                    <Bar dataKey="received" name="Collected" fill={RECEIVED} radius={[4, 4, 0, 0]} maxBarSize={22} />
-                    <Bar dataKey="billed" name="Billed" fill={BILLED} radius={[4, 4, 0, 0]} maxBarSize={22} />
+                    <CartesianGrid vertical={false} stroke={chart.grid} />
+                    <XAxis dataKey="month" tickFormatter={(m) => dayjs(`${m}-01`).format('MMM')} tickLine={false} axisLine={false} tick={{ fill: chart.tick, fontSize: 12 }} />
+                    <YAxis tickFormatter={(v) => (v >= 1000 ? `${Math.round(v / 1000)}k` : v)} tickLine={false} axisLine={false} tick={{ fill: chart.tick, fontSize: 12 }} width={44} />
+                    <Tooltip content={<RevenueTooltip />} cursor={{ fill: chart.cursor }} />
+                    <Bar dataKey="received" name="Collected" fill={chart.received} radius={[4, 4, 0, 0]} maxBarSize={22} />
+                    <Bar dataKey="billed" name="Billed" fill={chart.billed} radius={[4, 4, 0, 0]} maxBarSize={22} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -143,7 +149,7 @@ const Dashboard = () => {
             <div className="ls-up mb-2">By audience</div>
             <div className="d-flex gap-2 flex-wrap">
               {data.byAudience.map((a) => (
-                <Badge key={a.name} tone={a.name === 'children' ? 'pink' : a.name === 'teens' ? 'purple' : 'blue'}>
+                <Badge key={a.name} tone={a.name === 'children' ? 'pink' : 'blue'}>
                   {AUDIENCES[a.name] ?? a.name}: {a.count}
                 </Badge>
               ))}
@@ -172,7 +178,7 @@ const Dashboard = () => {
                     </div>
                     <i className={styles.classBar} style={{ background: g.program?.color ?? '#064CA5' }} />
                     <div className="flex-grow-1 min-w-0">
-                      <div className="fw-700 fg-ink text-ellipsis">{g.name}</div>
+                      <div className="fw-700 fg-ink text-ellipsis">{groupName(g)}</div>
                       <div className="fs-12 fg-muted text-ellipsis">
                         {fullName(g.teacher)} · {g.room} · {g.campus?.code}
                       </div>

@@ -43,7 +43,13 @@ export const EXAM_TYPES = {
   oral: { label: 'Oral', tone: 'amber' },
 };
 export const PAYMENT_METHODS = { cash: 'Cash', card: 'Card', transfer: 'Bank transfer', cheque: 'Cheque' };
-export const AUDIENCES = { adults: 'Adults', teens: 'Teens', children: 'Children' };
+export const AUDIENCES = { adults: 'Adults', children: 'Children' };
+// Default level names of a new program (same as eltc-api/src/constants/enums.js). Names stay editable.
+// Adults: A1, A2, B1, B1+, B2, C1. Children: Bounce 1 → Bounce 6.
+export const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B1+', 'B2', 'C1'];
+export const CHILDREN_LEVELS = ['Bounce 1', 'Bounce 2', 'Bounce 3', 'Bounce 4', 'Bounce 5', 'Bounce 6'];
+export const DEFAULT_LEVELS = { adults: CEFR_LEVELS, children: CHILDREN_LEVELS };
+export const defaultLevelNames = (audience) => DEFAULT_LEVELS[audience] ?? CEFR_LEVELS;
 export const CAMPUS_STATUS = {
   active: { label: 'Open', tone: 'green' },
   opening: { label: 'Opening soon', tone: 'purple' },
@@ -53,6 +59,7 @@ export const NOTIFICATION_TYPES = {
   payment_overdue: 'Overdue payment',
   payments_due_soon: 'Payments due soon',
   low_attendance: 'Low attendance',
+  low_book_stock: 'Books running low',
   exam_not_graded: 'Results missing',
   group_almost_full: 'Group almost full',
   group_ended: 'Group ended',

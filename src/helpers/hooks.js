@@ -47,3 +47,9 @@ export const useDebounced = (value, delay = 300) => {
 
 // The campus chosen in the top bar ('' = all campuses the user can see).
 export const useCampus = () => useSelector((s) => s.ui.campus);
+
+// Group name as shown in lists: with the campus code ("… Evening Tue RGH") when viewing all campuses.
+export const useGroupName = () => {
+  const campus = useCampus();
+  return (g) => (g ? (!campus && g.campus?.code ? `${g.name} ${g.campus.code}` : g.name) : '');
+};

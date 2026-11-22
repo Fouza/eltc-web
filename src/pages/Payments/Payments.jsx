@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import dayjs from 'dayjs';
-import { Download, FilePlus2, Plus, Printer, Receipt, Trash2, Wallet } from 'lucide-react';
-import { invoicesApi, paymentsApi } from '@api/endpoints';
-import { useApi, useCampus, useCan } from '@helpers/hooks';
+import { BookCheck, Download, FilePlus2, Plus, Printer, Receipt, Trash2, Undo2, Wallet } from 'lucide-react';
+import { booksApi, groupsApi, invoicesApi, paymentsApi } from '@api/endpoints';
+import { useApi, useCampus, useCan, useGroupName } from '@helpers/hooks';
 import { formatDate, fromNow, fullName, money } from '@helpers/format';
 import { downloadFile, toCsv } from '@helpers/csv';
 import { toast } from '@helpers/toast';
@@ -18,11 +18,27 @@ const InvoicesTab = ({ onPay }) => {
   const campus = useCampus();
   const [params, setParams] = useSearchParams();
   const status = params.get('status') ?? 'open';
+  const kind = params.get('kind') ?? 'all';
+  const group = params.get('group') ?? '';
+  const book = params.get('book') ?? '';
+  const setParam = (k, v) => { setPage(1); setParams((p) => { if (v) p.set(k, v); else p.delete(k); return p; }); };
+  const groupName = useGroupName();
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState(null);
   const canEdit = useCan(CAN.manageInvoices);
   const confirm = useConfirm();
-  const { data, loading, reload } = useApi(() => invoicesApi.list({ status: status === 'all' ? '' : status, campus, page }), [status, campus, page]);
+  const filters = { status: status === 'all' ? '' : status, kind: kind === 'all' ? '' : kind, group, book: kind === 'book' ? book : '', campus };
+  const { data, loading, reload } = useApi(() => invoicesApi.list({ ...filters, page }), [status, kind, group, book, campus, page]);
+  const { data: groups } = useApi(() => groupsApi.list({ status: 'ongoing,planned,completed', campus }), [campus]);
+  const { data: books } = useApi(() => booksApi.list({ withImage: 'false' }), []);
+
+  const handover = async (inv, handedOver) => {
+    try {
+      await invoicesApi.handover(inv._id, handedOver);
+      toast.success(handedOver ? 'Book handed over' : 'Hand-over undone', handedOver ? 'One copy taken out of the campus stock.' : 'The copy is back in stock.');
+      reload();
+    } catch (err) { toast.error(err); }
+  };
 
   const cancel = async (inv) => {
     if (!(await confirm({ title: `Cancel ${inv.number}?`, message: 'The student will no longer owe this amount.', danger: true, confirmLabel: 'Cancel invoice' }))) return;
@@ -34,25 +50,45 @@ const InvoicesTab = ({ onPay }) => {
   };
 
   const exportCsv = async () => {
-    const all = await invoicesApi.list({ status: status === 'all' ? '' : status, campus, limit: 200 });
+    const all = await invoicesApi.list({ ...filters, limit: 200 });
     downloadFile(
       toCsv(all.items, [
         { label: 'Number', value: (i) => i.number },
         { label: 'Student', value: (i) => fullName(i.student) },
         { label: 'Phone', value: (i) => i.student?.phone ?? i.student?.guardian?.phone },
+        { label: 'Type', value: (i) => i.kind ?? 'course' },
         { label: 'Label', value: (i) => i.label },
+        { label: 'Group', value: (i) => i.group?.name ?? '' },
         { label: 'Due date', value: (i) => dayjs(i.dueDate).format('YYYY-MM-DD') },
         { label: 'Amount', value: (i) => i.amount },
         { label: 'Paid', value: (i) => i.paidAmount },
         { label: 'Remaining', value: (i) => i.amount - i.paidAmount },
         { label: 'Status', value: (i) => (i.isOverdue ? 'overdue' : i.status) },
+        { label: 'Handed over', value: (i) => (i.kind === 'book' ? (i.handedOverAt ? dayjs(i.handedOverAt).format('YYYY-MM-DD') : 'no') : '') },
       ]),
-      `invoices-${status}-${dayjs().format('YYYY-MM-DD')}.csv`,
+      `invoices-${kind}-${status}-${dayjs().format('YYYY-MM-DD')}.csv`,
     );
   };
 
   return (
     <>
+      <div className="d-flex align-items-center gap-2 flex-wrap mb-3">
+        <Segmented
+          value={kind}
+          onChange={(v) => { setPage(1); setParams((p) => { p.delete('book'); if (v === 'all') p.delete('kind'); else p.set('kind', v); return p; }); }}
+          options={[{ value: 'all', label: 'All' }, { value: 'course', label: 'Courses' }, { value: 'book', label: 'Books' }]}
+        />
+        <select className="form-select" style={{ maxWidth: 320 }} value={group} onChange={(e) => setParam('group', e.target.value)} aria-label="Group">
+          <option value="">All groups</option>
+          {[...(groups ?? [])].sort((a, b) => a.name.localeCompare(b.name)).map((g) => <option key={g._id} value={g._id}>{groupName(g)}</option>)}
+        </select>
+        {kind === 'book' && (
+          <select className="form-select" style={{ maxWidth: 240 }} value={book} onChange={(e) => setParam('book', e.target.value)} aria-label="Book">
+            <option value="">All books</option>
+            {(books ?? []).map((b) => <option key={b._id} value={b._id}>{b.title}</option>)}
+          </select>
+        )}
+      </div>
       <div className="d-flex justify-content-between align-items-center gap-2 flex-wrap mb-3">
         <Segmented
           value={status}
@@ -80,7 +116,7 @@ const InvoicesTab = ({ onPay }) => {
             <div className="table-scroll">
               <table className="table-eltc">
                 <thead>
-                  <tr><th>Student</th><th>For</th><th>Due</th><th className="num">Amount</th><th className="num">Remaining</th><th>Status</th><th /></tr>
+                  <tr><th>Student</th><th>For</th><th>Due</th><th className="num">Amount</th><th className="num">Remaining</th><th>Status</th>{kind === 'book' && <th>Book given</th>}<th /></tr>
                 </thead>
                 <tbody>
                   {data.items.map((inv) => (
@@ -90,16 +126,27 @@ const InvoicesTab = ({ onPay }) => {
                         <div className="fs-12 fg-subtle">{inv.student?.phone ?? inv.student?.guardian?.phone ?? inv.student?.studentNumber}</div>
                       </td>
                       <td>
-                        <div className="fw-600">{inv.label}</div>
-                        <div className="fs-12 fg-subtle">{inv.number}</div>
+                        <div className="fw-600">{inv.kind === 'book' && <Badge tone="purple" className="me-1">Book</Badge>}{inv.label}</div>
+                        <div className="fs-12 fg-subtle">{inv.number}{inv.group ? ` · ${inv.group.name}` : ''}</div>
                       </td>
                       <td>
                         <div>{formatDate(inv.dueDate)}</div>
-                        {inv.isOverdue && <div className="fs-12 fg-red fw-600">{fromNow(inv.dueDate)}</div>}
+                        {inv.isOverdue && <div className="fs-12 fg-red fw-600">{fromNow(inv.overdueAt ?? inv.dueDate)}</div>}
+                        {!inv.isOverdue && inv.kind === 'book' && ['unpaid', 'partial'].includes(inv.status) && inv.overdueAt && <div className="fs-12 fg-subtle">Overdue after {formatDate(inv.overdueAt)}</div>}
                       </td>
                       <td className="num">{money(inv.amount)}</td>
                       <td className="num fw-700">{money(inv.amount - inv.paidAmount)}</td>
                       <td>{inv.isOverdue ? <StatusBadge map={INVOICE_STATUS} value="overdue" /> : <StatusBadge map={INVOICE_STATUS} value={inv.status} />}</td>
+                      {kind === 'book' && (
+                        <td className="text-nowrap">
+                          {inv.status === 'cancelled' ? <span className="fg-subtle">—</span> : inv.handedOverAt ? (
+                            <span className="d-inline-flex align-items-center gap-1">
+                              <Badge tone="green" dot>{formatDate(inv.handedOverAt)}</Badge>
+                              {canEdit && <Button size="sm" variant="ghost" icon={Undo2} onClick={() => handover(inv, false)} aria-label="Undo" title="Undo (puts the copy back in stock)" />}
+                            </span>
+                          ) : canEdit ? <Button size="sm" variant="secondary" icon={BookCheck} onClick={() => handover(inv, true)}>Hand over</Button> : <Badge tone="amber">Not yet</Badge>}
+                        </td>
+                      )}
                       <td className="text-end text-nowrap">
                         {['unpaid', 'partial'].includes(inv.status) && <Button size="sm" variant="soft" onClick={() => onPay(inv)}>Collect</Button>}
                         {canEdit && inv.status !== 'cancelled' && inv.status !== 'paid' && (

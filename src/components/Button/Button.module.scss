@@ -18,8 +18,8 @@
   &:not(:disabled):hover { box-shadow: 0 10px 24px rgba(74, 67, 216, 0.35); filter: brightness(1.05); }
 }
 .secondary {
-  background: #fff; color: $ink-2; border-color: #d0d5dd; box-shadow: $shadow-sm;
-  &:not(:disabled):hover { background: #f9fafb; color: $ink; }
+  background: $surface; color: $ink-2; border-color: $input-border; box-shadow: $shadow-sm;
+  &:not(:disabled):hover { background: $surface-2; color: $ink; }
 }
 .soft {
   background: $blue-50; color: $blue;
@@ -30,8 +30,8 @@
   &:not(:disabled):hover { background: $line-2; color: $ink; }
 }
 .danger {
-  background: $red-50; color: $red; border-color: #fecdca;
-  &:not(:disabled):hover { background: #fee4e2; }
+  background: $red-50; color: $red; border-color: $red-100;
+  &:not(:disabled):hover { background: $red-100; }
 }
 .spinner {
   width: 15px; height: 15px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent;

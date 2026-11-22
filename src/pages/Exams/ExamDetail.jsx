@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { Pencil, Save, Trash2 } from 'lucide-react';
 import { examsApi } from '@api/endpoints';
 import { useApi, useCan } from '@helpers/hooks';
-import { formatDate, fullName } from '@helpers/format';
+import { formatDate, fullName, levelName } from '@helpers/format';
 import { toast } from '@helpers/toast';
 import { useConfirm } from '@context/ConfirmContext';
 import { Avatar, Badge, Button, Card, EmptyState, Loader, PageHeader, StatCard, StatusBadge } from '@components';
@@ -71,7 +71,7 @@ const ExamDetail = () => {
       <PageHeader
         breadcrumb={[{ label: 'Exams', to: '/exams' }, { label: exam.title }]}
         title={<span className="d-inline-flex gap-2 align-items-center">{exam.title} <StatusBadge map={EXAM_TYPES} value={exam.type} dot={false} /></span>}
-        subtitle={<><Link to={`/groups/${exam.group?._id}`}>{exam.group?.name}</Link> · {exam.program?.name} L{exam.levelNumber} · {formatDate(exam.date)} · graded /{exam.maxScore}, pass at {exam.passScore}</>}
+        subtitle={<><Link to={`/groups/${exam.group?._id}`}>{exam.group?.name}</Link> · {exam.program?.name} {levelName(exam.levelNumber, exam.program)} · {formatDate(exam.date)} · graded /{exam.maxScore}, pass at {exam.passScore}</>}
         actions={canEdit && (
           <>
             <Button variant="secondary" icon={Pencil} onClick={() => setEditing(true)}>Edit</Button>

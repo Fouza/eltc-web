@@ -1,11 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { ChevronDown, LogOut, Menu, MapPin, UserRound } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, MapPin, Moon, Sun, UserRound } from 'lucide-react';
 import { Avatar, Dropdown } from '@components';
 import { campusSelected, sidebarToggled } from '@store/uiSlice';
 import { logout } from '@store/authSlice';
 import { fullName } from '@helpers/format';
 import { ROLE_LABELS } from '@data/roles';
+import { toggleTheme, useTheme } from '@helpers/theme';
 import GlobalSearch from './GlobalSearch';
 import NotificationBell from './NotificationBell';
 import styles from './AppLayout.module.scss';
@@ -16,6 +17,7 @@ const Topbar = () => {
   const user = useSelector((s) => s.auth.user);
   const campuses = useSelector((s) => s.refs.campuses);
   const campus = useSelector((s) => s.ui.campus);
+  const theme = useTheme();
   const allowed = user?.campusIds?.length ? campuses.filter((c) => user.campusIds.some((u) => (u._id ?? u) === c._id)) : campuses;
 
   return (
@@ -36,6 +38,15 @@ const Topbar = () => {
             ))}
           </select>
         </div>
+        <button
+          type="button"
+          className={styles.iconBtn}
+          onClick={toggleTheme}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        >
+          {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
+        </button>
         <NotificationBell />
         <Dropdown
           width={230}

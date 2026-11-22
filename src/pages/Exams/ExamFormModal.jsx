@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { examsApi, groupsApi } from '@api/endpoints';
 import { Button, Field, Modal } from '@components';
-import { todayInput, toInputDate } from '@helpers/format';
+import { todayInput, toInputDate, levelName } from '@helpers/format';
 import { toast } from '@helpers/toast';
 import { EXAM_TYPES } from '@data/enums';
 
@@ -43,7 +43,7 @@ const ExamFormModal = ({ open, onClose, onSaved, exam, group: fixedGroup }) => {
         <Field label="Group" required>
           <select className="form-select" value={f.group ?? ''} onChange={(e) => set('group', e.target.value)}>
             <option value="">Choose…</option>
-            {groups.map((g) => <option key={g._id} value={g._id}>{g.name} · {g.program?.name} L{g.levelNumber}</option>)}
+            {groups.map((g) => <option key={g._id} value={g._id}>{g.name} · {g.program?.name} {levelName(g.levelNumber, g.program)}</option>)}
           </select>
         </Field>
       )}

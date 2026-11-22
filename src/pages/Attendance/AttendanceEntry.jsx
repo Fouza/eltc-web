@@ -3,8 +3,8 @@ import { Link, useSearchParams } from 'react-router';
 import dayjs from 'dayjs';
 import { AlertTriangle, Check, ChevronLeft, ChevronRight, ClipboardCheck, Keyboard, Phone, Save, Trash2 } from 'lucide-react';
 import { attendanceApi, groupsApi } from '@api/endpoints';
-import { useApi, useCampus, useCan } from '@helpers/hooks';
-import { formatDateTime, fullName, scheduleLabel, todayInput } from '@helpers/format';
+import { useApi, useCampus, useCan, useGroupName } from '@helpers/hooks';
+import { formatDate, formatDateTime, formatDay, fullName, scheduleLabel, todayInput } from '@helpers/format';
 import { toast } from '@helpers/toast';
 import { useConfirm } from '@context/ConfirmContext';
 import { Avatar, Badge, Button, Card, EmptyState, Field, Loader, PageHeader, Segmented } from '@components';
@@ -28,6 +28,7 @@ const lastSessionDate = (group) => {
 
 const AttendanceEntry = () => {
   const campus = useCampus();
+  const groupName = useGroupName();
   const confirm = useConfirm();
   const [params, setParams] = useSearchParams();
   const canEdit = useCan(CAN.recordAttendance);
@@ -68,7 +69,7 @@ const AttendanceEntry = () => {
       const saved = await attendanceApi.save({ groupId, date, topic: sheet.topic, entries: sheet.entries.map((e) => ({ student: e.student._id, status: e.status, note: e.note })) });
       setSheet(saved);
       setDirty(false);
-      toast.success('Attendance saved', `${group?.name} · ${dayjs(date).format('ddd D MMM')}`);
+      toast.success('Attendance saved', `${group?.name} · ${formatDay(date)}`);
     } catch (err) {
       toast.error(err);
     } finally {
@@ -143,7 +144,7 @@ const AttendanceEntry = () => {
                 <div className="d-flex flex-wrap gap-2">
                   {todays.map((g) => (
                     <button key={g._id} type="button" className={styles.quick} onClick={() => setParams({ group: g._id })}>
-                      <b>{g.name}</b> <span>{g.schedule.find((s) => s.day === dayjs().day())?.startTime}</span>
+                      <b>{groupName(g)}</b> <span>{g.schedule.find((s) => s.day === dayjs().day())?.startTime}</span>
                     </button>
                   ))}
                 </div>
@@ -158,7 +159,7 @@ const AttendanceEntry = () => {
           ) : (
             <Card
               padded={false}
-              title={`${group?.name ?? ''} · ${dayjs(date).format('dddd D MMMM')}`}
+              title={`${group?.name ?? ''} · ${formatDate(date)}`}
               subtitle={
                 sheet.exists
                   ? `Saved by ${fullName(sheet.recordedBy)} · ${formatDateTime(sheet.updatedAt)}${dirty ? ' · unsaved changes' : ''}`

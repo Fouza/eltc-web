@@ -8,7 +8,7 @@
 .label { font-size: 13px; font-weight: 500; }
 .skeleton {
   display: block; border-radius: 6px;
-  background: linear-gradient(90deg, $line-2 25%, #f9fafb 50%, $line-2 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite;
+  background: linear-gradient(90deg, $line-2 25%, $surface-2 50%, $line-2 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes shimmer { to { background-position: -200% 0; } }

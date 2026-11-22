@@ -1,5 +1,5 @@
 import {
-  LayoutDashboard, Users, Hourglass, Layers, CalendarDays, ClipboardCheck, GraduationCap, Wallet, BookOpen, UserSquare2, Settings, Bell,
+  LayoutDashboard, Users, Hourglass, Layers, CalendarDays, ClipboardCheck, GraduationCap, Wallet, BookOpen, BookCopy, UserSquare2, Settings, Bell,
 } from 'lucide-react';
 import { CAN } from '@data/roles';
 
@@ -20,6 +20,7 @@ export const NAV = [
   { to: '/payments', label: 'Payments', icon: Wallet, roles: CAN.viewFinance },
   { section: 'School' },
   { to: '/programs', label: 'Programs & levels', icon: BookOpen },
+  { to: '/books', label: 'Books', icon: BookCopy },
   { to: '/teachers', label: 'Teachers', icon: UserSquare2 },
   { to: '/settings', label: 'Settings', icon: Settings, roles: CAN.manageSettings },
 ];

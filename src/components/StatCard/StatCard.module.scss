@@ -1,8 +1,8 @@
 @use 'variables' as *;
 
 .card {
-  background: #fff; border-radius: $radius-lg; box-shadow: $shadow; padding: 18px 20px; height: 100%;
-  border: 1px solid rgba(234, 236, 240, 0.7); transition: transform 0.15s, box-shadow 0.15s;
+  background: $surface; border-radius: $radius-lg; box-shadow: $shadow; padding: 18px 20px; height: 100%;
+  border: 1px solid $line; transition: transform 0.15s, box-shadow 0.15s;
 }
 .clickable { cursor: pointer; &:hover { transform: translateY(-2px); box-shadow: $shadow-lg; } }
 .label { color: $muted; font-size: 13px; font-weight: 600; }
@@ -16,5 +16,5 @@
 .red { background: $red-50; color: $red; }
 .cyan { background: $cyan-50; color: $cyan; }
 .up, .down { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
-.up { color: #027a48; background: $green-50; }
-.down { color: #b42318; background: $red-50; }
+.up { color: $green-ink; background: $green-50; }
+.down { color: $red-ink; background: $red-50; }

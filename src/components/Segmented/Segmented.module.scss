@@ -8,9 +8,9 @@
 }
 .md .option { height: 32px; padding: 0 12px; font-size: 13px; }
 .sm .option { height: 28px; min-width: 32px; padding: 0 8px; font-size: 12px; }
-.active { background: #fff; box-shadow: $shadow-sm; }
+.active { background: $surface; box-shadow: $shadow-sm; }
 .blue { color: $blue !important; }
-.green { color: #fff !important; background: $green; }
-.red { color: #fff !important; background: $red; }
-.amber { color: #fff !important; background: $amber; }
+.green { color: #fff !important; background: $green-solid; }
+.red { color: #fff !important; background: $red-solid; }
+.amber { color: #fff !important; background: $amber-solid; }
 .purple { color: $purple !important; }

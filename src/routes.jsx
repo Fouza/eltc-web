@@ -41,6 +41,7 @@ export const routeConfig = [
       { path: 'payments', page: page(() => import('@pages/Payments/Payments')), roles: CAN.viewFinance },
       { path: 'payments/:id/receipt', page: page(() => import('@pages/Payments/Receipt')), roles: CAN.viewFinance },
       { path: 'programs', page: page(() => import('@pages/Programs/Programs')) },
+      { path: 'books', page: page(() => import('@pages/Books/Books')) },
       { path: 'teachers', page: page(() => import('@pages/Teachers/Teachers')) },
       { path: 'settings', page: page(() => import('@pages/Settings/Settings')), roles: CAN.manageSettings },
       { path: 'account', page: page(() => import('@pages/Account/Account')) },

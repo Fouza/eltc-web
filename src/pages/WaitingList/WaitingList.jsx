@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { Hourglass, Phone, Plus, UserPlus } from 'lucide-react';
 import { studentsApi } from '@api/endpoints';
 import { useApi, useCampus, useCan } from '@helpers/hooks';
-import { fromNow, fullName } from '@helpers/format';
+import { fromNow, fullName, levelName } from '@helpers/format';
 import { Avatar, Badge, Button, Card, EmptyState, Loader, PageHeader } from '@components';
 import { CAN } from '@data/roles';
 import { AUDIENCES } from '@data/enums';
@@ -36,7 +36,7 @@ const WaitingList = () => {
                 title={b.program ? `${b.program.name}` : 'No course chosen'}
                 subtitle={
                   <span className="d-flex gap-1 mt-1 flex-wrap">
-                    {b.levelNumber && <Badge tone="purple">Level {b.levelNumber}</Badge>}
+                    {b.levelNumber && <Badge tone="purple">{levelName(b.levelNumber, b.program)}</Badge>}
                     <Badge color={b.campus?.color}>{b.campus?.name}</Badge>
                     {b.program && <Badge tone="gray">{AUDIENCES[b.program.audience]}</Badge>}
                   </span>

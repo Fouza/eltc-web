@@ -1,0 +1,52 @@
+// Light and dark palettes. The theme is set on <html data-bs-theme="light|dark"> (see helpers/theme.js),
+// which also switches Bootstrap's own components.
+$theme-light: (
+  blue: #064CA5, blue-700: #043b82, blue-50: #eef4fd, blue-100: #dbe7fa,
+  purple: #7b3fe4, purple-50: #f3edfd,
+  gradient-soft: linear-gradient(135deg, rgba(6, 76, 165, 0.08) 0%, rgba(123, 63, 228, 0.08) 100%),
+  green: #12b76a, green-50: #ecfdf3, green-ink: #027a48,
+  amber: #f59e0b, amber-50: #fffaeb, amber-ink: #b54708,
+  red: #f04438, red-50: #fef3f2, red-100: #fecdca, red-ink: #b42318,
+  cyan: #0ea5a4, cyan-50: #ecfdfd, cyan-ink: #0e7c7b,
+  pink: #ec4899, pink-50: #fdf2f8, pink-ink: #c11574,
+  ink: #101828, ink-2: #344054, muted: #667085, subtle: #98a2b3,
+  line: #eaecf0, line-2: #f2f4f7, bg: #f5f7fb,
+  surface: #fff, surface-2: #fafbfd, input-border: #d0d5dd, mix-ink: #000,
+  lift: 0%, tint-ink: 15%, // how much mix-ink goes into text tinted with a custom colour
+  shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.05),
+  shadow: (0 1px 3px rgba(16, 24, 40, 0.04), 0 6px 20px rgba(16, 24, 40, 0.06)),
+  shadow-lg: 0 12px 40px rgba(16, 24, 40, 0.12),
+);
+
+$theme-dark: (
+  blue: #6ea8fe, blue-700: #9ec5fe, blue-50: #16243b, blue-100: #213658,
+  purple: #a98bf5, purple-50: #251d3f,
+  gradient-soft: linear-gradient(135deg, rgba(110, 168, 254, 0.14) 0%, rgba(169, 139, 245, 0.14) 100%),
+  green: #32d583, green-50: #0f2a1f, green-ink: #6ce9a6,
+  amber: #fdb022, amber-50: #2e2311, amber-ink: #fec84b,
+  red: #f97066, red-50: #341a1b, red-100: #5a2522, red-ink: #fda29b,
+  cyan: #2ed3b7, cyan-50: #0f2a2b, cyan-ink: #5fe9d0,
+  pink: #f670c7, pink-50: #331a2b, pink-ink: #faa7e0,
+  ink: #f2f4f7, ink-2: #d0d5dd, muted: #98a2b3, subtle: #6c7689,
+  line: #283041, line-2: #1d2330, bg: #0c1018,
+  surface: #141a24, surface-2: #19202c, input-border: #344054, mix-ink: #fff,
+  lift: 45%, tint-ink: 45%,
+  shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3),
+  shadow: (0 1px 3px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25)),
+  shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5),
+);
+
+@mixin theme-vars($map) {
+  @each $name, $value in $map { --#{'' + $name}: #{$value}; }
+}
+
+:root, [data-bs-theme='light'] { @include theme-vars($theme-light); }
+[data-bs-theme='dark'] { @include theme-vars($theme-dark); }
+
+// Paper is white: print in light colours whatever the screen theme.
+@media print {
+  [data-bs-theme='dark'] {
+    @include theme-vars($theme-light);
+    color-scheme: light; --bs-body-bg: #fff; --bs-body-color: #101828; --bs-border-color: #eaecf0;
+  }
+}

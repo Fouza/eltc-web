@@ -4,7 +4,7 @@ import { useSearchParams, Link } from 'react-router';
 import { Mail, Pencil, Phone, Plus, UserSquare2 } from 'lucide-react';
 import { teachersApi } from '@api/endpoints';
 import { reloadRef } from '@store/refsSlice';
-import { useApi, useCan } from '@helpers/hooks';
+import { useApi, useCan, useGroupName } from '@helpers/hooks';
 import { fullName, scheduleLabel } from '@helpers/format';
 import { toast } from '@helpers/toast';
 import { Avatar, Badge, Button, Card, EmptyState, Field, Modal, PageHeader, SearchInput, StatusBadge } from '@components';
@@ -53,12 +53,13 @@ const TeacherModal = ({ open, teacher, onClose, onSaved }) => {
 };
 
 const TeacherGroups = ({ teacher, onClose }) => {
+  const groupName = useGroupName();
   const { data } = useApi(() => teachersApi.get(teacher._id), [teacher?._id], { skip: !teacher });
   return (
     <Modal open={Boolean(teacher)} onClose={onClose} title={fullName(teacher)} subtitle={[teacher?.phone, teacher?.email].filter(Boolean).join(' · ')} size="lg">
       {data?.groups?.length ? data.groups.map((g) => (
         <Link key={g._id} to={`/groups/${g._id}`} className="d-flex justify-content-between align-items-center p-2 border-bottom fg-ink">
-          <div><div className="fw-700">{g.name}</div><div className="fs-12 fg-muted">{g.program?.name} · {scheduleLabel(g.schedule)} · {g.campus?.name}</div></div>
+          <div><div className="fw-700">{groupName(g)}</div><div className="fs-12 fg-muted">{g.program?.name} · {scheduleLabel(g.schedule)} · {g.campus?.name}</div></div>
           <div className="d-flex gap-2 align-items-center"><span className="fs-12 fg-muted">{g.enrolledCount} students</span><StatusBadge map={GROUP_STATUS} value={g.status} /></div>
         </Link>
       )) : <EmptyState compact title="No group assigned" />}

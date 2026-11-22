@@ -11,12 +11,12 @@
   position: relative; border-left: 1px solid $line-2;
   background-image: linear-gradient(to bottom, $line-2 1px, transparent 1px); background-size: 100% var(--hour);
 }
-.todayCol { background-color: rgba(6, 76, 165, 0.025); }
+.todayCol { background-color: color-mix(in srgb, var(--blue) 4%, transparent); }
 .event {
   position: absolute; border: none; text-align: left; border-radius: 10px; padding: 5px 8px; overflow: hidden;
   display: flex; flex-direction: column; gap: 1px; font-size: 11.5px; line-height: 1.25;
-  background: color-mix(in srgb, var(--c) 12%, white); color: color-mix(in srgb, var(--c) 80%, black);
-  border-left: 3px solid var(--c); box-shadow: 0 0 0 2px #fff;
+  background: color-mix(in srgb, var(--c) 12%, var(--surface)); color: color-mix(in srgb, var(--c), var(--mix-ink) calc(var(--tint-ink) + 5%));
+  border-left: 3px solid var(--c); box-shadow: 0 0 0 2px $surface;
   b { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.85; }
   &:hover { filter: brightness(0.97); z-index: 2; box-shadow: $shadow; }

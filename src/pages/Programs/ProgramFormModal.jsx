@@ -4,9 +4,18 @@ import { Plus, X } from 'lucide-react';
 import { programsApi } from '@api/endpoints';
 import { Button, Field, Modal } from '@components';
 import { toast } from '@helpers/toast';
-import { AUDIENCES } from '@data/enums';
+import { AUDIENCES, defaultLevelNames } from '@data/enums';
 
-const defaultLevels = (fee = 0) => Array.from({ length: 6 }, (_, i) => ({ number: i + 1, name: `Level ${i + 1}`, durationWeeks: 12, hours: 36, fee }));
+// Adults start with A1, A2, B1, B1+, B2, C1; children with Bounce 1 → 6. Names stay editable.
+const defaultLevels = (audience, fee = 0) => {
+  const kids = audience === 'children';
+  return defaultLevelNames(audience).map((name, i) => ({ number: i + 1, name, durationWeeks: kids ? 10 : 12, hours: kids ? 30 : 36, fee }));
+};
+// True while the level names are still the untouched defaults of that audience.
+const isDefault = (levels, audience) => {
+  const names = defaultLevelNames(audience);
+  return levels?.length === names.length && levels.every((l, i) => l.name === names[i]);
+};
 
 // A program ("workshop") = language + audience + its levels (6 by default, each with duration and fee).
 const ProgramFormModal = ({ open, onClose, onSaved, program }) => {
@@ -18,11 +27,14 @@ const ProgramFormModal = ({ open, onClose, onSaved, program }) => {
     if (!open) return;
     setF(program
       ? { ...program, language: program.language?._id, levels: program.levels.map((l) => ({ ...l })) }
-      : { name: '', language: languages[0]?._id ?? '', audience: 'adults', color: '#064CA5', description: '', active: true, levels: defaultLevels() });
+      : { name: '', language: languages[0]?._id ?? '', audience: 'adults', color: '#064CA5', description: '', active: true, levels: defaultLevels('adults') });
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (k, v) => setF((x) => ({ ...x, [k]: v }));
   const setLevel = (i, k, v) => set('levels', f.levels.map((l, j) => (j === i ? { ...l, [k]: ['durationWeeks', 'hours', 'fee'].includes(k) ? Number(v) : v } : l)));
+  // Switching audience swaps in that audience's default levels, unless the levels were already edited.
+  const setAudience = (audience) =>
+    setF((x) => ({ ...x, audience, ...(isDefault(x.levels, x.audience) ? { levels: defaultLevels(audience, x.levels[0]?.fee ?? 0) } : {}) }));
   const autoName = () => {
     const lang = languages.find((l) => l._id === f.language);
     if (lang && !f.name) set('name', `${lang.name} – ${AUDIENCES[f.audience]}`);
@@ -54,7 +66,7 @@ const ProgramFormModal = ({ open, onClose, onSaved, program }) => {
         </div>
         <div className="col-md-3">
           <Field label="For" required>
-            <select className="form-select" value={f.audience ?? 'adults'} onChange={(e) => set('audience', e.target.value)} onBlur={autoName}>
+            <select className="form-select" value={f.audience ?? 'adults'} onChange={(e) => setAudience(e.target.value)} onBlur={autoName}>
               {Object.entries(AUDIENCES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
           </Field>
@@ -67,7 +79,7 @@ const ProgramFormModal = ({ open, onClose, onSaved, program }) => {
       </div>
       <div className="d-flex justify-content-between align-items-center mb-2">
         <div className="ls-up">Levels ({f.levels?.length ?? 0})</div>
-        <Button size="sm" variant="soft" icon={Plus} onClick={() => set('levels', [...f.levels, { ...(f.levels.at(-1) ?? {}), number: f.levels.length + 1, name: `Level ${f.levels.length + 1}` }])}>Add a level</Button>
+        <Button size="sm" variant="soft" icon={Plus} onClick={() => set('levels', [...f.levels, { ...(f.levels.at(-1) ?? {}), number: f.levels.length + 1, name: defaultLevelNames(f.audience)[f.levels.length] ?? `Level ${f.levels.length + 1}` }])}>Add a level</Button>
       </div>
       <div className="table-scroll border rounded-3">
         <table className="table-eltc compact">

@@ -10,21 +10,22 @@ import { toast } from '@helpers/toast';
 const FIELDS = [
   ['firstName', 'First name', ['prenom', 'prénom', 'first name', 'firstname']],
   ['lastName', 'Last name', ['nom', 'last name', 'lastname', 'surname']],
-  ['phone', 'Phone', ['telephone', 'téléphone', 'tel', 'phone', 'mobile']],
+  ['phone', 'Phone', ['telephone', 'téléphone', 'tel', 'tél', 'tél.', 'phone', 'mobile', 'portable']],
   ['email', 'Email', ['email', 'mail', 'e-mail']],
   ['birthDate', 'Birth date (YYYY-MM-DD)', ['date de naissance', 'birth date', 'birthdate', 'naissance']],
   ['gender', 'Gender', ['sexe', 'gender', 'genre']],
   ['address', 'Address', ['adresse', 'address']],
   ['city', 'City', ['ville', 'city']],
   ['occupation', 'Occupation', ['profession', 'occupation', 'job']],
-  ['guardianName', 'Guardian name', ['parent', 'tuteur', 'guardian']],
-  ['guardianPhone', 'Guardian phone', ['tel parent', 'téléphone parent', 'guardian phone']],
+  ['guardianName', 'Guardian name', ['parent', 'tuteur', 'guardian', 'nom du parent', 'nom parent']],
+  ['guardianPhone', 'Guardian phone', ['tel parent', 'tél parent', 'téléphone parent', 'téléphone du parent']],
   ['notes', 'Notes', ['notes', 'remarques', 'observations']],
 ];
 
+// A column matches a field by one of its aliases or by the field's own label (the downloaded template uses the labels).
 const guess = (header) => {
   const h = header.toLowerCase().trim();
-  return FIELDS.find(([, , aliases]) => aliases.includes(h))?.[0] ?? '';
+  return FIELDS.find(([, label, aliases]) => aliases.includes(h) || label.toLowerCase() === h)?.[0] ?? '';
 };
 
 const ImportStudentsModal = ({ open, onClose, onDone }) => {

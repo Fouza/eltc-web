@@ -4,8 +4,8 @@ import {
   ArrowRightLeft, CalendarCheck2, FilePlus2, GraduationCap, Layers, LogOut, Mail, MapPin, Pencil, Phone, Plus, Printer, Trash2, UserRound, Wallet,
 } from 'lucide-react';
 import { enrollmentsApi, studentsApi, groupsApi } from '@api/endpoints';
-import { useApi, useCan } from '@helpers/hooks';
-import { age, formatDate, formatDay, fullName, money, percent, scheduleLabel } from '@helpers/format';
+import { useApi, useCan, useGroupName } from '@helpers/hooks';
+import { age, formatDate, formatDay, fullName, money, percent, scheduleLabel, levelName } from '@helpers/format';
 import { toast } from '@helpers/toast';
 import { useConfirm } from '@context/ConfirmContext';
 import { Avatar, Badge, Button, Card, Dropdown, EmptyState, Field, Loader, Modal, PageHeader, StatusBadge, Tabs } from '@components';
@@ -33,7 +33,7 @@ const TransferModal = ({ enrollment, onClose, onSaved }) => {
         <select className="form-select" value={groupId} onChange={(e) => setGroupId(e.target.value)}>
           <option value="">Choose…</option>
           {groups?.filter((g) => g._id !== enrollment?.group?._id).map((g) => (
-            <option key={g._id} value={g._id}>{g.name} — L{g.levelNumber} · {g.campus?.code} · {scheduleLabel(g.schedule)} · {g.enrolledCount}/{g.capacity}</option>
+            <option key={g._id} value={g._id}>{g.name} — {levelName(g.levelNumber, g.program)} · {g.campus?.code} · {scheduleLabel(g.schedule)} · {g.enrolledCount}/{g.capacity}</option>
           ))}
         </select>
       </Field>
@@ -49,6 +49,7 @@ const InfoRow = ({ label, children }) => (
 );
 
 const StudentProfile = () => {
+  const groupName = useGroupName();
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -72,9 +73,9 @@ const StudentProfile = () => {
   const setTab = (t) => setParams({ tab: t });
 
   const leaveGroup = async (e) => {
-    if (!(await confirm({ title: `Remove from ${e.group?.name}?`, message: 'The student leaves the group. Future unpaid installments of this group will be cancelled.', danger: true, confirmLabel: 'Remove' }))) return;
+    if (!(await confirm({ title: `Remove from ${e.group?.name}?`, message: 'The student leaves the group. The current month stays due; the months that haven\'t started yet are cancelled.', danger: true, confirmLabel: 'Remove' }))) return;
     try {
-      await enrollmentsApi.update(e._id, { status: 'dropped', cancelUnpaidInvoices: true });
+      await enrollmentsApi.update(e._id, { status: 'dropped' });
       toast.success('Student removed from the group');
       reload();
     } catch (err) { toast.error(err); }
@@ -151,8 +152,8 @@ const StudentProfile = () => {
                 <Card className={e.status !== 'active' ? styles.faded : ''}>
                   <div className="d-flex justify-content-between align-items-start gap-2">
                     <div className="min-w-0">
-                      <Link to={`/groups/${e.group?._id}`} className="fw-800 fs-15 fg-ink">{e.group?.name}</Link>
-                      <div className="fs-13 fg-muted">{e.program?.name} · Level {e.levelNumber}</div>
+                      <Link to={`/groups/${e.group?._id}`} className="fw-800 fs-15 fg-ink">{groupName(e.group)}</Link>
+                      <div className="fs-13 fg-muted">{e.program?.name} · {levelName(e.levelNumber, e.program)}</div>
                     </div>
                     <div className="d-flex gap-1">
                       <StatusBadge map={ENROLLMENT_STATUS} value={e.status} />
@@ -195,7 +196,7 @@ const StudentProfile = () => {
                     <tbody>
                       {invoices.map((inv) => (
                         <tr key={inv._id}>
-                          <td><div className="fw-600">{inv.label}</div><div className="fs-12 fg-subtle">{inv.number}</div></td>
+                          <td><div className="fw-600">{inv.kind === 'book' && <Badge tone="purple" className="me-1">Book</Badge>}{inv.label}</div><div className="fs-12 fg-subtle">{inv.number}{inv.kind === 'book' ? (inv.handedOverAt ? ' · given' : ' · not given yet') : ''}</div></td>
                           <td>{formatDate(inv.dueDate)}</td>
                           <td className="num">{money(inv.amount)}</td>
                           <td className="num">{money(inv.paidAmount)}</td>
@@ -305,7 +306,7 @@ const StudentProfile = () => {
             <Card title="Registration">
               <InfoRow label="Registered">{formatDate(s.registeredAt)} {s.createdBy && `by ${fullName(s.createdBy)}`}</InfoRow>
               <InfoRow label="Source">{s.source}</InfoRow>
-              <InfoRow label="Wanted">{s.desiredProgram && `${s.desiredProgram.name}${s.desiredLevel ? ` · Level ${s.desiredLevel}` : ''}`}</InfoRow>
+              <InfoRow label="Wanted">{s.desiredProgram && `${s.desiredProgram.name}${s.desiredLevel ? ` · ${levelName(s.desiredLevel, s.desiredProgram)}` : ''}`}</InfoRow>
               <InfoRow label="Preferred times">{s.preferredSlots}</InfoRow>
               <InfoRow label="Notes">{s.notes}</InfoRow>
             </Card>

@@ -1,14 +1,14 @@
 @use 'variables' as *;
 
 .quick {
-  border: 1px solid $line; background: #fff; border-radius: 10px; padding: 7px 12px; font-size: 13px; box-shadow: $shadow-sm;
+  border: 1px solid $line; background: $surface; border-radius: 10px; padding: 7px 12px; font-size: 13px; box-shadow: $shadow-sm;
   span { color: $muted; margin-left: 4px; }
   &:hover { border-color: $blue; color: $blue; }
 }
 .list { padding: 8px; max-height: 62vh; overflow-y: auto; }
 .row {
   display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 12px; border: 1px solid transparent; cursor: pointer;
-  &:hover { background: #fafbfd; }
+  &:hover { background: $surface-2; }
 }
 .focused { border-color: $blue-100; background: $blue-50 !important; }
 .absent { background: rgba(240, 68, 56, 0.05); }
@@ -18,5 +18,5 @@
 .footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 18px; border-top: 1px solid $line-2; }
 .keys {
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; color: $muted;
-  kbd { background: #fff; color: $ink; border: 1px solid $line; border-bottom-width: 2px; border-radius: 6px; padding: 1px 6px; font-size: 11.5px; font-family: inherit; margin-right: 3px; }
+  kbd { background: $surface; color: $ink; border: 1px solid $line; border-bottom-width: 2px; border-radius: 6px; padding: 1px 6px; font-size: 11.5px; font-family: inherit; margin-right: 3px; }
 }

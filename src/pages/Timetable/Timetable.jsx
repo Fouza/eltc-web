@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import dayjs from 'dayjs';
 import { groupsApi } from '@api/endpoints';
-import { useApi, useCampus } from '@helpers/hooks';
+import { useApi, useCampus, useGroupName } from '@helpers/hooks';
 import { fullName } from '@helpers/format';
 import { Card, Loader, PageHeader } from '@components';
 import { DAYS, WEEK_ORDER } from '@data/days';
@@ -18,6 +18,7 @@ const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + 
 const Timetable = () => {
   const navigate = useNavigate();
   const campus = useCampus();
+  const groupName = useGroupName();
   const teachers = useSelector((s) => s.refs.teachers);
   const [teacher, setTeacher] = useState('');
   const { data: groups, loading } = useApi(() => groupsApi.list({ status: 'ongoing,planned', campus, teacher }), [campus, teacher]);
@@ -81,9 +82,9 @@ const Timetable = () => {
                         className={styles.event}
                         style={{ top, height, left: `calc(${(lane / lanes) * 100}% + 3px)`, width: `calc(${100 / lanes}% - 6px)`, '--c': g.program?.color ?? '#064CA5' }}
                         onClick={() => navigate(`/groups/${g._id}`)}
-                        title={`${g.name} · ${s.startTime}–${s.endTime} · ${fullName(g.teacher)} · ${g.room ?? ''}`}
+                        title={`${groupName(g)} · ${s.startTime}–${s.endTime} · ${fullName(g.teacher)} · ${g.room ?? ''}`}
                       >
-                        <b>{g.name}</b>
+                        <b>{groupName(g)}</b>
                         <span>{s.startTime}–{s.endTime}</span>
                         {height > 50 && <span>{fullName(g.teacher)} · {g.room} · {g.campus?.code}</span>}
                       </button>

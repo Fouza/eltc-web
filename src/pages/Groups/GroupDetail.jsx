@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import dayjs from 'dayjs';
 import {
   ArrowUpCircle, CalendarDays, ClipboardCheck, DoorOpen, GraduationCap, MapPin, Pencil, Plus, Trash2, UserRound, Users,
 } from 'lucide-react';
 import { groupsApi } from '@api/endpoints';
-import { useApi, useCan } from '@helpers/hooks';
-import { formatDate, fullName, money, percent, scheduleLabel } from '@helpers/format';
+import { useApi, useCan, useGroupName } from '@helpers/hooks';
+import { formatDate, formatDay, fullName, money, percent, scheduleLabel, levelName } from '@helpers/format';
 import { toast } from '@helpers/toast';
 import { useConfirm } from '@context/ConfirmContext';
 import { Avatar, Badge, Button, Card, Dropdown, EmptyState, Loader, PageHeader, ProgressBar, StatusBadge, Tabs } from '@components';
@@ -14,9 +13,17 @@ import { CAN } from '@data/roles';
 import { ATTENDANCE_STATUS, ENROLLMENT_STATUS, FINAL_RESULTS, GROUP_STATUS } from '@data/enums';
 import EnrollModal from '@pages/Students/EnrollModal';
 import ExamsTable from '@pages/Exams/ExamsTable';
-import GroupFormModal from './GroupFormModal';
+import GroupFormModal, { suggestName } from './GroupFormModal';
 import PromoteModal from './PromoteModal';
 import styles from './Groups.module.scss';
+
+// Name for the next-level group: swap the level name in the current name, else suggest a fresh one.
+const nextGroupName = (g) => {
+  if (g.name === suggestName(g.program, g.levelNumber, g.sessions)) return suggestName(g.program, g.levelNumber + 1, g.sessions);
+  const current = g.level?.name ?? levelName(g.levelNumber, g.program);
+  const next = levelName(g.levelNumber + 1, g.program);
+  return current && g.name.includes(current) ? g.name.replace(current, next) : suggestName(g.program, g.levelNumber + 1, g.sessions);
+};
 
 const AttendanceMatrix = ({ groupId, roster }) => {
   const { data: sheets, loading } = useApi(() => groupsApi.attendance(groupId), [groupId]);
@@ -31,7 +38,7 @@ const AttendanceMatrix = ({ groupId, roster }) => {
         <thead>
           <tr>
             <th>Student</th>
-            {shown.map((s) => <th key={s._id} className="text-center" title={s.topic}>{dayjs(s.date).format('D/M')}</th>)}
+            {shown.map((s) => <th key={s._id} className="text-center" title={s.topic}>{formatDay(s.date)}</th>)}
             <th className="num">Rate</th>
           </tr>
         </thead>
@@ -53,6 +60,7 @@ const AttendanceMatrix = ({ groupId, roster }) => {
 };
 
 const GroupDetail = () => {
+  const groupName = useGroupName();
   const { id } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -101,10 +109,10 @@ const GroupDetail = () => {
         breadcrumb={[{ label: 'Groups', to: '/groups' }, { label: g.name }]}
         title={
           <span className="d-inline-flex align-items-center gap-2 flex-wrap">
-            {g.name} <StatusBadge map={GROUP_STATUS} value={g.status} />
+            {groupName(g)} <StatusBadge map={GROUP_STATUS} value={g.status} />
           </span>
         }
-        subtitle={`${g.program?.name} · ${g.level?.name ?? `Level ${g.levelNumber}`}`}
+        subtitle={`${g.program?.name} · ${g.level?.name ?? levelName(g.levelNumber, g.program)}`}
         actions={
           <>
             <Link to={`/attendance?group=${g._id}`}><Button variant="secondary" icon={ClipboardCheck}>Take attendance</Button></Link>
@@ -146,7 +154,7 @@ const GroupDetail = () => {
               <Users className="fg-blue" />
             </div>
             <ProgressBar value={g.enrolledCount} max={g.capacity} height={8} />
-            <div className="d-flex justify-content-between mt-3 fs-13"><span className="fg-muted">Sessions held</span><b>{g.sessions}</b></div>
+            <div className="d-flex justify-content-between mt-3 fs-13"><span className="fg-muted">Sessions held</span><b>{g.sessionsHeld}</b></div>
             <div className="d-flex justify-content-between mt-1 fs-13"><span className="fg-muted">Average attendance</span><b>{percent(stats.attendance)}</b></div>
             {canFinance && <div className="d-flex justify-content-between mt-1 fs-13"><span className="fg-muted">Left to collect</span><b className={stats.overdue ? 'fg-red' : ''}>{money(stats.due)}</b></div>}
           </Card>
@@ -194,7 +202,7 @@ const GroupDetail = () => {
       <GroupFormModal open={editing} group={g} onClose={() => setEditing(false)} onSaved={reload} />
       <GroupFormModal
         open={creatingNext}
-        prefill={{ program: g.program?._id, levelNumber: g.levelNumber + 1, campus: g.campus?._id, teacher: g.teacher?._id ?? '', schedule: g.schedule, capacity: g.capacity, room: g.room, name: g.name.replace(/\d+/, (n) => String(Number(n) + 1)) }}
+        prefill={{ program: g.program?._id, levelNumber: g.levelNumber + 1, campus: g.campus?._id, teacher: g.teacher?._id ?? '', sessions: g.sessions ?? [], capacity: g.capacity, room: g.room, name: nextGroupName(g) }}
         onClose={() => setCreatingNext(false)}
         onSaved={() => setPromoting(true)}
       />

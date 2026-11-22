@@ -1,28 +1,32 @@
 // Copy of eltc-api/src/constants/roles.js — keep both in sync.
-export const ROLES = { ADMIN: 'admin', SECRETARY: 'secretary', ACCOUNTANT: 'accountant', COORDINATOR: 'coordinator' };
+export const ROLES = { ADMIN: 'admin', SECRETARY: 'secretary' };
 export const ALL_ROLES = Object.values(ROLES);
 
 export const ROLE_LABELS = {
   admin: 'Admin (manager)',
   secretary: 'Secretary',
-  accountant: 'Accountant',
-  coordinator: 'Pedagogical coordinator',
 };
 
+// Who may write what. Reading is open to every logged-in staff member.
+const ADMIN_ONLY = [ROLES.ADMIN];
+const STAFF = [ROLES.ADMIN, ROLES.SECRETARY];
+
 export const CAN = {
-  manageUsers: [ROLES.ADMIN],
-  manageSettings: [ROLES.ADMIN],
-  manageCampuses: [ROLES.ADMIN],
-  managePrograms: [ROLES.ADMIN, ROLES.COORDINATOR],
-  manageTeachers: [ROLES.ADMIN, ROLES.COORDINATOR, ROLES.SECRETARY],
-  manageGroups: [ROLES.ADMIN, ROLES.COORDINATOR, ROLES.SECRETARY],
-  manageStudents: [ROLES.ADMIN, ROLES.SECRETARY, ROLES.COORDINATOR],
-  deleteStudents: [ROLES.ADMIN],
-  manageEnrollments: [ROLES.ADMIN, ROLES.SECRETARY, ROLES.COORDINATOR],
-  recordAttendance: [ROLES.ADMIN, ROLES.SECRETARY, ROLES.COORDINATOR],
-  manageExams: [ROLES.ADMIN, ROLES.SECRETARY, ROLES.COORDINATOR],
-  manageInvoices: [ROLES.ADMIN, ROLES.ACCOUNTANT, ROLES.SECRETARY],
-  recordPayments: [ROLES.ADMIN, ROLES.ACCOUNTANT, ROLES.SECRETARY],
-  deletePayments: [ROLES.ADMIN, ROLES.ACCOUNTANT],
-  viewFinance: [ROLES.ADMIN, ROLES.ACCOUNTANT, ROLES.SECRETARY],
+  manageUsers: ADMIN_ONLY,
+  manageSettings: ADMIN_ONLY,
+  manageCampuses: ADMIN_ONLY,
+  managePrograms: STAFF,
+  manageBooks: STAFF,
+  deleteBooks: ADMIN_ONLY,
+  manageTeachers: STAFF,
+  manageGroups: STAFF,
+  manageStudents: STAFF,
+  deleteStudents: ADMIN_ONLY, // deletes are permanent: kept for the manager
+  manageEnrollments: STAFF,
+  recordAttendance: STAFF,
+  manageExams: STAFF,
+  manageInvoices: STAFF,
+  recordPayments: STAFF,
+  deletePayments: ADMIN_ONLY, // protects the cash: a recorded payment can only be removed by the manager
+  viewFinance: STAFF,
 };

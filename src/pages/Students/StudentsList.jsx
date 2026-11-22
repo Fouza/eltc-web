@@ -6,7 +6,7 @@ import { Download, Plus, Upload, Users } from 'lucide-react';
 import { fetchStudents, queryChanged } from '@store/studentsSlice';
 import { studentsApi } from '@api/endpoints';
 import { useCampus, useCan, useDebounced } from '@helpers/hooks';
-import { age, formatDate, fullName, money } from '@helpers/format';
+import { age, formatDate, fullName, money, levelName } from '@helpers/format';
 import { downloadFile, toCsv } from '@helpers/csv';
 import { Avatar, Badge, Button, Card, EmptyState, Loader, PageHeader, Pagination, SearchInput, Segmented, StatusBadge } from '@components';
 import { CAN } from '@data/roles';
@@ -123,7 +123,7 @@ const StudentsList = () => {
                       <td>
                         <div className="d-flex flex-wrap gap-1">
                           {s.groups.map((g) => <Badge key={g._id} color={g.program?.color}>{g.name}</Badge>)}
-                          {!s.groups.length && s.desiredProgram && <span className="fs-12 fg-muted">Wants {s.desiredProgram.name} L{s.desiredLevel}</span>}
+                          {!s.groups.length && s.desiredProgram && <span className="fs-12 fg-muted">Wants {s.desiredProgram.name} {levelName(s.desiredLevel, s.desiredProgram)}</span>}
                         </div>
                       </td>
                       {canFinance && (

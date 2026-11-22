@@ -155,7 +155,7 @@ const StudentForm = () => {
               </select>
             </Field>
             {program && (
-              <Field label="Level" hint="From the placement test, or Level 1 for beginners">
+              <Field label="Level" hint="From the placement test, or the first level (A1 or Bounce 1) for beginners">
                 <select className="form-select" {...bind('desiredLevel')}>
                   <option value="">—</option>
                   {program.levels.map((l) => <option key={l.number} value={l.number}>{l.name}</option>)}

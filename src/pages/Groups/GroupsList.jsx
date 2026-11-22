@@ -3,8 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { CalendarDays, Layers, Plus, UserRound } from 'lucide-react';
 import { fetchGroups, groupsQueryChanged } from '@store/groupsSlice';
-import { useCampus, useCan } from '@helpers/hooks';
-import { formatDate, fullName, scheduleLabel } from '@helpers/format';
+import { useCampus, useCan, useGroupName } from '@helpers/hooks';
+import { formatDate, fullName, scheduleLabel, levelName } from '@helpers/format';
 import { Badge, Button, EmptyState, Loader, PageHeader, ProgressBar, Segmented, StatusBadge } from '@components';
 import { CAN } from '@data/roles';
 import { GROUP_STATUS } from '@data/enums';
@@ -15,6 +15,7 @@ const GroupsList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const campus = useCampus();
+  const groupName = useGroupName();
   const { items, loading, query } = useSelector((s) => s.groups);
   const { programs, languages } = useSelector((s) => s.refs);
   const [creating, setCreating] = useState(false);
@@ -61,12 +62,12 @@ const GroupsList = () => {
               <div className={styles.groupCard} onClick={() => navigate(`/groups/${g._id}`)} role="button" style={{ '--c': g.program?.color ?? '#064CA5' }}>
                 <div className="d-flex justify-content-between align-items-start gap-2">
                   <div className="min-w-0">
-                    <div className={styles.groupName}>{g.name}</div>
+                    <div className={styles.groupName}>{groupName(g)}</div>
                     <div className="fs-13 fg-muted text-ellipsis">{g.program?.name} · {g.campus?.name}</div>
                   </div>
                   <StatusBadge map={GROUP_STATUS} value={g.status} />
                 </div>
-                <div className={styles.level}>{g.level?.name ?? `Level ${g.levelNumber}`}</div>
+                <div className={styles.level}>{g.level?.name ?? levelName(g.levelNumber, g.program)}</div>
                 <div className={styles.facts}>
                   <span><UserRound size={14} /> {fullName(g.teacher) || <i className="fg-subtle">No teacher</i>}</span>
                   <span><CalendarDays size={14} /> {scheduleLabel(g.schedule)}</span>

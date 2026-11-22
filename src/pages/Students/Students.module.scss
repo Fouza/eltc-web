@@ -2,7 +2,7 @@
 
 .profileHead {
   display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
-  background: #fff; border-radius: $radius-lg; box-shadow: $shadow; padding: 22px 24px; margin: -8px 0 16px;
+  background: $surface; border-radius: $radius-lg; box-shadow: $shadow; padding: 22px 24px; margin: -8px 0 16px;
   position: relative; overflow: hidden;
   &::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: $gradient; }
 }
@@ -13,12 +13,12 @@
   a { color: $muted; &:hover { color: $blue; } }
 }
 .mini {
-  display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 14px; box-shadow: $shadow; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px; background: $surface; border-radius: 14px; box-shadow: $shadow; padding: 14px 16px;
   svg { flex-shrink: 0; }
   span { display: block; font-size: 12px; color: $muted; font-weight: 600; }
   b { font-size: 18px; font-variant-numeric: tabular-nums; }
 }
-.miniDanger { background: $red-50; b { color: #b42318; } }
+.miniDanger { background: $red-50; b { color: $red-ink; } }
 .enrollGrid { margin-top: 12px; }
 .infoRow {
   display: flex; gap: 12px; padding: 7px 0; border-bottom: 1px dashed $line-2; font-size: 13.5px;

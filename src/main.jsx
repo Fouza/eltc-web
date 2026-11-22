@@ -10,9 +10,11 @@ import { setUnauthorizedHandler } from '@api/client';
 import { SocketProvider } from '@context/SocketContext';
 import { ConfirmProvider } from '@context/ConfirmContext';
 import { Toaster } from '@components';
+import { initTheme } from '@helpers/theme';
 import { routes } from './routes';
 
 dayjs.locale('en');
+initTheme();
 setUnauthorizedHandler(() => store.dispatch(logout()));
 if (store.getState().auth.token) store.dispatch(fetchMe());
 

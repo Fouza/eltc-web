@@ -11,10 +11,8 @@ import { ALL_ROLES, ROLE_LABELS } from '@data/roles';
 import { CAMPUS_STATUS } from '@data/enums';
 
 const ROLE_HELP = {
-  admin: 'Everything, including staff accounts and settings',
-  secretary: 'Registrations, groups, attendance, exams, collecting payments',
-  accountant: 'Invoices, payments and finance figures',
-  coordinator: 'Programs, groups, teachers, attendance and exams (no finance)',
+  admin: 'Everything, including staff accounts, campuses and settings',
+  secretary: 'Everything except staff accounts, campuses, settings and deleting students or payments',
 };
 
 const SchoolTab = () => {
@@ -41,14 +39,12 @@ const SchoolTab = () => {
             <div className="col-6"><Field label="Number format"><select className="form-select" value={f.locale ?? 'fr-FR'} onChange={(e) => setF({ ...f, locale: e.target.value })}><option value="fr-FR">1 234,5</option><option value="en-GB">1,234.5</option></select></Field></div>
             <div className="col-6"><Field label="Exams graded out of"><input type="number" className="form-control" {...num('defaultMaxScore')} /></Field></div>
             <div className="col-6"><Field label="Default pass mark"><input type="number" className="form-control" {...num('defaultPassScore')} /></Field></div>
-            <div className="col-6"><Field label="Default installments"><input type="number" min="1" max="12" className="form-control" {...num('defaultInstallments')} /></Field></div>
           </div>
         </Card>
       </div>
       <div className="col-lg-6">
         <Card title="Automatic alerts" subtitle="Checked every morning by the scheduler" icon={ShieldCheck}>
           <Field label="Low attendance alert after" hint="absences in the last 30 days"><input type="number" min="1" className="form-control" {...num('lowAttendanceThreshold')} /></Field>
-          <Field label="Overdue alert after" hint="days past the due date (0 = the next day)"><input type="number" min="0" className="form-control" {...num('overdueGraceDays')} /></Field>
           <Field label="Group almost full at" hint="share of seats taken (0.9 = 90%)"><input type="number" min="0.5" max="1" step="0.05" className="form-control" value={f.groupAlmostFullRatio ?? ''} onChange={(e) => setF({ ...f, groupAlmostFullRatio: Number(e.target.value) })} /></Field>
         </Card>
         <div className="text-end mt-3"><Button loading={saving} onClick={save}>Save settings</Button></div>
@@ -150,7 +146,7 @@ const UserModal = ({ user, onClose, onSaved }) => {
           {ALL_ROLES.map((r) => (
             <div key={r} className="col-sm-6">
               <label className={`d-flex gap-2 p-2 px-3 rounded-3 border h-100 cursor-pointer ${f.roles?.includes(r) ? 'border-primary bg-blue-50' : ''}`}>
-                <input type="checkbox" className="form-check-input mt-1" checked={f.roles?.includes(r) ?? false} onChange={() => toggle('roles', r)} />
+                <input type="radio" name="role" className="form-check-input mt-1" checked={f.roles?.includes(r) ?? false} onChange={() => setF({ ...f, roles: [r] })} />
                 <div><div className="fw-700 fs-13">{ROLE_LABELS[r]}</div><div className="fs-12 fg-muted">{ROLE_HELP[r]}</div></div>
               </label>
             </div>

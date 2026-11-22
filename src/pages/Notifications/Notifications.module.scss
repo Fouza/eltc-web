@@ -2,10 +2,10 @@
 
 .item {
   display: flex; gap: 12px; align-items: flex-start; width: 100%; border: none; background: none; padding: 12px; border-radius: 12px;
-  &:hover { background: #f9fafb; }
+  &:hover { background: $surface-2; }
 }
 .compact { padding: 9px 8px; }
-.unread { background: rgba(6, 76, 165, 0.035); }
+.unread { background: color-mix(in srgb, var(--blue) 5%, transparent); }
 .icon { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex-shrink: 0; }
 .compact .icon { width: 30px; height: 30px; border-radius: 9px; }
 .info { background: $blue-50; color: $blue; }

@@ -2,7 +2,7 @@
 
 .wrap { position: relative; display: inline-block; }
 .menu {
-  position: absolute; top: calc(100% + 8px); z-index: 1000; background: #fff; border-radius: 14px; box-shadow: $shadow-lg;
+  position: absolute; top: calc(100% + 8px); z-index: 1000; background: $surface; border-radius: 14px; box-shadow: $shadow-lg;
   border: 1px solid $line; padding: 6px; animation: pop 0.12s ease-out;
 }
 .end { right: 0; }

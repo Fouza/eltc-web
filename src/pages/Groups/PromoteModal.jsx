@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { groupsApi } from '@api/endpoints';
 import { Button, Field, Modal, StatusBadge, Badge } from '@components';
-import { fullName, scheduleLabel, todayInput } from '@helpers/format';
+import { formatDate, fullName, money, scheduleLabel, levelName } from '@helpers/format';
+import { buildMonthlyPlan } from '@helpers/paymentPlan';
 import { toast } from '@helpers/toast';
 import { FINAL_RESULTS } from '@data/enums';
 
@@ -10,9 +11,8 @@ const PromoteModal = ({ open, onClose, group, onSaved, onCreateNext }) => {
   const [targets, setTargets] = useState([]);
   const [target, setTarget] = useState('');
   const [selected, setSelected] = useState([]);
-  const [installments, setInstallments] = useState(1);
-  const [firstDueDate, setFirstDueDate] = useState(todayInput());
   const [saving, setSaving] = useState(false);
+  const nextLevel = group ? levelName(group.levelNumber + 1, group.program) : '';
   const candidates = useMemo(() => (group?.roster ?? []).filter((e) => ['active', 'completed'].includes(e.status)), [group]);
 
   useEffect(() => {
@@ -25,11 +25,15 @@ const PromoteModal = ({ open, onClose, group, onSaved, onCreateNext }) => {
     });
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const targetGroup = targets.find((g) => g._id === target);
+  const targetPlan = targetGroup
+    ? buildMonthlyPlan({ total: targetGroup.fee ?? targetGroup.level?.fee ?? 0, weeks: targetGroup.level?.durationWeeks ?? 0, startDate: targetGroup.startDate }).plan
+    : [];
   const toggle = (id) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   const save = async () => {
     setSaving(true);
     try {
-      const res = await groupsApi.promote(group._id, { targetGroupId: target, studentIds: selected, installments: Number(installments), firstDueDate });
+      const res = await groupsApi.promote(group._id, { targetGroupId: target, studentIds: selected });
       toast.success(`${res.promoted} students moved to the next level`, res.skipped.length ? `${res.skipped.length} skipped` : undefined);
       onSaved?.();
       onClose();
@@ -45,15 +49,15 @@ const PromoteModal = ({ open, onClose, group, onSaved, onCreateNext }) => {
       open={open}
       onClose={onClose}
       size="lg"
-      title={`Promote to level ${group ? group.levelNumber + 1 : ''}`}
+      title={`Promote to ${nextLevel}`}
       subtitle="Selected students finish this group and are enrolled in the next-level group with new invoices."
       footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button disabled={!target || !selected.length} loading={saving} onClick={save}>Promote {selected.length} students</Button></>}
     >
       {!targets.length ? (
         <div className="p-3 rounded-4 bg-blue-50 d-flex justify-content-between align-items-center gap-3">
           <div>
-            <div className="fw-700">No level {group?.levelNumber + 1} group yet</div>
-            <div className="fs-13 fg-muted">Create the next group first (same program, level {group?.levelNumber + 1}).</div>
+            <div className="fw-700">No {nextLevel} group yet</div>
+            <div className="fs-13 fg-muted">Create the next group first (same program, level {nextLevel}).</div>
           </div>
           <Button variant="primary" size="sm" onClick={onCreateNext}>Create it</Button>
         </div>
@@ -64,10 +68,13 @@ const PromoteModal = ({ open, onClose, group, onSaved, onCreateNext }) => {
               {targets.map((g) => <option key={g._id} value={g._id}>{g.name} · {g.campus?.code} · {scheduleLabel(g.schedule)} · {g.enrolledCount}/{g.capacity}</option>)}
             </select>
           </Field>
-          <div className="row">
-            <div className="col-6"><Field label="Pay in"><select className="form-select" value={installments} onChange={(e) => setInstallments(e.target.value)}>{[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n === 1 ? 'One payment' : `${n} installments`}</option>)}</select></Field></div>
-            <div className="col-6"><Field label="First payment due"><input type="date" className="form-control" value={firstDueDate} onChange={(e) => setFirstDueDate(e.target.value)} /></Field></div>
-          </div>
+          {targetGroup && (
+            <div className="p-3 rounded-4 bg-blue-50 fs-13 mb-3">
+              Each student is invoiced monthly for the new level:{' '}
+              <b>{targetPlan.filter((m) => !m.skipped).map((m) => money(m.amount)).join(' + ')}</b>, the first due {formatDate(targetPlan.find((m) => !m.skipped)?.dueDate)}.
+              {' '}The new level's books are charged too.
+            </div>
+          )}
         </>
       )}
       <div className="ls-up mt-2 mb-2">Students ({selected.length} selected)</div>

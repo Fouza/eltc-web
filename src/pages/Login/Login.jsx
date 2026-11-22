@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Eye, EyeOff, Lock, Mail, CalendarCheck2, Wallet, Users } from 'lucide-react';
 import { login } from '@store/authSlice';
@@ -12,12 +12,21 @@ const Login = () => {
   const [show, setShow] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [slow, setSlow] = useState(false);
+
+  // On the free hosting plan the API sleeps when unused: start waking it while the user types.
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/health`).catch(() => {});
+  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    const timer = setTimeout(() => setSlow(true), 4000);
     const res = await dispatch(login({ email, password }));
+    clearTimeout(timer);
+    setSlow(false);
     setLoading(false);
     if (res.error) setError(res.error.message);
   };
@@ -48,6 +57,7 @@ const Login = () => {
           <Button type="submit" size="lg" block loading={loading} className="mt-2">
             Sign in
           </Button>
+          {slow && <p className="fs-13 fg-muted mt-2 text-center">The server is waking up. This can take up to a minute the first time.</p>}
           <p className="fs-12 fg-subtle mt-4 text-center">Accounts are created by the school manager. Forgot your password? Ask them to reset it.</p>
         </form>
       </div>

@@ -1,10 +1,10 @@
-import { AlertTriangle, CalendarClock, GraduationCap, Info, Users, Wallet, Flag } from 'lucide-react';
+import { AlertTriangle, BookOpen, CalendarClock, GraduationCap, Info, Users, Wallet, Flag } from 'lucide-react';
 import { fromNow } from '@helpers/format';
 import styles from './Notifications.module.scss';
 
 const ICONS = {
   payment_overdue: Wallet, payments_due_soon: CalendarClock, low_attendance: AlertTriangle,
-  exam_not_graded: GraduationCap, group_almost_full: Users, group_ended: Flag,
+  exam_not_graded: GraduationCap, group_almost_full: Users, group_ended: Flag, low_book_stock: BookOpen,
 };
 
 const NotificationItem = ({ notification: n, onClick, compact }) => {
