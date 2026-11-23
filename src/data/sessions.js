@@ -1,5 +1,6 @@
 // The school's fixed class sessions. A group picks its sessions instead of free times; the schedule is derived from them.
-// Kids: 1 session a week, weekend only. Adults: 2 sessions a week on different days (any pair).
+// Kids: 1 weekend session a week. Adults: one of 3 schedules with the same hours (6 h a week):
+// Weekend Morning (Fri + Sat mornings), Weekend Afternoon (Fri + Sat afternoons) or Evening (Sun, Tue, Thu).
 // Copy of eltc-api/src/constants/sessions.js — keep both in sync.
 export const SESSIONS = [
   { key: 'sat_am', label: 'Saturday Morning', day: 6, startTime: '08:00', endTime: '11:00', audiences: ['adults', 'children'] },
@@ -12,24 +13,37 @@ export const SESSIONS = [
   { key: 'fri_pm', label: 'Friday Afternoon', day: 5, startTime: '14:30', endTime: '17:30', audiences: ['adults', 'children'] },
 ];
 export const SESSION_KEYS = SESSIONS.map((s) => s.key);
-export const SESSIONS_PER_WEEK = { adults: 2, children: 1 };
+
+// Adults choose a whole schedule, not single sessions.
+export const ADULT_SCHEDULES = [
+  { key: 'weekend_am', label: 'Weekend Morning', sessions: ['sat_am', 'fri_am'] },
+  { key: 'weekend_pm', label: 'Weekend Afternoon', sessions: ['sat_pm', 'fri_pm'] },
+  { key: 'evening', label: 'Evening', sessions: ['eve_sun', 'eve_tue', 'eve_thu'] },
+];
 
 export const sessionsFor = (audience) => SESSIONS.filter((s) => s.audiences.includes(audience));
 
-// Sessions in week order (the list above starts on Saturday), e.g. "Saturday Morning + Evening Tue".
+// Sessions in week order (the list above starts on Saturday).
 export const sortSessions = (keys = []) => SESSION_KEYS.filter((k) => keys.includes(k));
-export const sessionsLabel = (keys = []) => sortSessions(keys).map((k) => SESSIONS.find((s) => s.key === k).label).join(' + ');
+
+// The adult schedule these sessions make up, if any.
+export const adultScheduleOf = (keys = []) => {
+  const sorted = sortSessions(keys).join();
+  return ADULT_SCHEDULES.find((p) => sortSessions(p.sessions).join() === sorted) ?? null;
+};
+
+// "Weekend Morning", "Evening" (adults) or "Saturday Midday" (kids).
+export const sessionsLabel = (keys = []) =>
+  adultScheduleOf(keys)?.label ?? sortSessions(keys).map((k) => SESSIONS.find((s) => s.key === k).label).join(' + ');
 
 // Returns an error message, or null when the choice is valid for this audience.
 export const checkSessions = (keys = [], audience = 'adults') => {
-  const allowed = sessionsFor(audience).map((s) => s.key);
-  const need = SESSIONS_PER_WEEK[audience] ?? 1;
-  const who = audience === 'children' ? 'Kids' : 'Adults';
-  if (keys.length !== need) return `${who} groups have ${need} session${need > 1 ? 's' : ''} a week`;
-  if (keys.some((k) => !allowed.includes(k))) return `This session is not available for ${who.toLowerCase()}`;
-  const days = keys.map((k) => SESSIONS.find((s) => s.key === k).day);
-  if (new Set(days).size !== days.length) return 'Pick sessions on different days';
-  return null;
+  if (audience === 'children') {
+    if (keys.length !== 1) return 'Kids groups have 1 session a week';
+    if (!sessionsFor('children').some((s) => s.key === keys[0])) return 'This session is not available for kids';
+    return null;
+  }
+  return adultScheduleOf(keys) ? null : 'Adults groups follow one schedule: Weekend Morning, Weekend Afternoon or Evening';
 };
 
 export const scheduleFromSessions = (keys = []) =>

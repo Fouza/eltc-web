@@ -4,7 +4,7 @@ import { groupsApi } from '@api/endpoints';
 import { Button, Field, Modal } from '@components';
 import { toInputDate, money, fullName, levelName } from '@helpers/format';
 import { toast } from '@helpers/toast';
-import { SESSIONS_PER_WEEK, checkSessions, sessionsFor, sessionsLabel } from '@data/sessions';
+import { ADULT_SCHEDULES, SESSIONS, adultScheduleOf, checkSessions, sessionsFor, sessionsLabel } from '@data/sessions';
 import { GROUP_STATUS } from '@data/enums';
 
 const blank = (prefill = {}) => ({
@@ -12,7 +12,7 @@ const blank = (prefill = {}) => ({
   startDate: '', endDate: '', fee: '', status: 'planned', notes: '', ...prefill,
 });
 
-// Suggested name: language - level, audience, sessions. "EN - A1 Adults Saturday Morning + Evening Tue", "FR - Bounce 2 Kids Friday Morning".
+// Suggested name: language - level, audience, schedule. "EN - A1 Adults Weekend Morning", "FR - Bounce 2 Kids Friday Morning".
 export const suggestName = (program, level, sessions = []) => {
   if (!program) return '';
   const code = program.language?.code?.toUpperCase() ?? '';
@@ -38,7 +38,6 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
   const level = program?.levels.find((l) => l.number === Number(f.levelNumber));
   const campus = campuses.find((c) => c._id === f.campus);
   const audience = program?.audience ?? 'adults';
-  const need = SESSIONS_PER_WEEK[audience];
   const sessionError = program ? checkSessions(f.sessions, audience) : null;
 
   // The name follows program / level / sessions until the user types their own.
@@ -48,13 +47,18 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
       const next = { ...x, ...patch };
       return { ...next, name: !x.name || x.name === autoName(x) ? autoName(next) : x.name };
     });
-  const toggleSession = (key) => {
-    const has = f.sessions.includes(key);
-    const day = sessionsFor(audience).find((s) => s.key === key)?.day;
-    // Picking a session replaces the one on the same day; kids keep only one session.
-    const others = need === 1 ? [] : f.sessions.filter((k) => sessionsFor(audience).find((s) => s.key === k)?.day !== day);
-    update({ sessions: has ? f.sessions.filter((k) => k !== key) : [...others, key].slice(-need) });
-  };
+  // Kids pick one session; adults pick one whole schedule (its sessions are stored on the group).
+  const options = !program
+    ? []
+    : audience === 'children'
+      ? sessionsFor('children').map((s) => ({ key: s.key, label: s.label, detail: `${s.startTime}–${s.endTime}`, sessions: [s.key] }))
+      : ADULT_SCHEDULES.map((p) => ({
+          key: p.key,
+          label: p.label,
+          detail: p.sessions.map((k) => SESSIONS.find((s) => s.key === k)).map((s) => `${s.label.replace(/^Evening /, '')} ${s.startTime}–${s.endTime}`).join(' · '),
+          sessions: p.sessions,
+        }));
+  const chosen = audience === 'children' ? f.sessions[0] : adultScheduleOf(f.sessions)?.key;
 
   // End date from the level duration.
   const onStart = (v) => {
@@ -110,7 +114,7 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
         </div>
         <div className="col-sm-6">
           <Field label="Group name" required hint="Filled in from the level and sessions. You can change it.">
-            <input className="form-control" value={f.name} onChange={(e) => set('name', e.target.value)} placeholder={suggestName(program, f.levelNumber, f.sessions) || 'EN - A1 Adults Saturday Morning + Evening Tue'} />
+            <input className="form-control" value={f.name} onChange={(e) => set('name', e.target.value)} placeholder={suggestName(program, f.levelNumber, f.sessions) || 'EN - A1 Adults Weekend Morning'} />
           </Field>
         </div>
         <div className="col-sm-6">
@@ -141,18 +145,18 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
         <div className="col-sm-3"><Field label="Seats"><input type="number" min="1" className="form-control" value={f.capacity} onChange={(e) => set('capacity', e.target.value)} /></Field></div>
       </div>
       <Field
-        label={`Sessions · ${audience === 'children' ? 'kids: 1 a week' : 'adults: 2 a week, on different days'}`}
+        label={audience === 'children' ? 'Session · kids: 1 a week' : 'Schedule · adults: same hours whichever they choose'}
         required
-        hint={!program ? 'Choose the program first.' : f.sessions.length < need ? `Pick ${need - f.sessions.length} more.` : sessionError ?? undefined}
+        hint={!program ? 'Choose the program first.' : !chosen ? `Pick ${audience === 'children' ? 'a session' : 'a schedule'}.` : sessionError ?? undefined}
       >
         <div className="row g-2">
-          {(program ? sessionsFor(audience) : []).map((s) => {
-            const on = f.sessions.includes(s.key);
+          {options.map((o) => {
+            const on = chosen === o.key;
             return (
-              <div key={s.key} className="col-sm-6 col-lg-3">
+              <div key={o.key} className={audience === 'children' ? 'col-sm-6 col-lg-3' : 'col-md-4'}>
                 <label className={`d-flex gap-2 p-2 px-3 rounded-3 border h-100 cursor-pointer ${on ? 'border-primary bg-blue-50' : ''}`}>
-                  <input type={need === 1 ? 'radio' : 'checkbox'} name="session" className="form-check-input mt-1" checked={on} onChange={() => toggleSession(s.key)} />
-                  <div><div className="fw-700 fs-13">{s.label}</div><div className="fs-12 fg-muted">{s.startTime}–{s.endTime}</div></div>
+                  <input type="radio" name="session" className="form-check-input mt-1" checked={on} onChange={() => update({ sessions: o.sessions })} />
+                  <div><div className="fw-700 fs-13">{o.label}</div><div className="fs-12 fg-muted">{o.detail}</div></div>
                 </label>
               </div>
             );
