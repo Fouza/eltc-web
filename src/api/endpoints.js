@@ -31,6 +31,18 @@ export const booksApi = {
   stock: (id, data) => api.post(`/books/${id}/stock`, data),
 };
 export const teachersApi = crud('/teachers');
+export const certificatesApi = {
+  list: (params) => api.get('/certificates', params),
+  candidates: (params) => api.get('/certificates/candidates', params),
+  stats: (params) => api.get('/certificates/stats', params),
+  forPrint: (ids) => api.get('/certificates/print', { ids: ids.join(',') }),
+  issue: (enrollmentIds) => api.post('/certificates', { enrollmentIds }),
+  printed: (ids) => api.post('/certificates/printed', { ids }),
+  handover: (id, data) => api.post(`/certificates/${id}/handover`, data),
+  undoHandover: (id) => api.delete(`/certificates/${id}/handover`),
+  revoke: (id, reason) => api.post(`/certificates/${id}/revoke`, { reason }),
+  verify: (code) => api.get(`/verify/${encodeURIComponent(code)}`), // public, no login
+};
 
 export const groupsApi = {
   ...crud('/groups'),

@@ -70,7 +70,7 @@ const PromoteModal = ({ open, onClose, group, onSaved, onCreateNext }) => {
           </Field>
           {targetGroup && (
             <div className="p-3 rounded-4 bg-blue-50 fs-13 mb-3">
-              Each student is invoiced monthly for the new level:{' '}
+              Each student is invoiced every 4 weeks for the new level:{' '}
               <b>{targetPlan.filter((m) => !m.skipped).map((m) => money(m.amount)).join(' + ')}</b>, the first due {formatDate(targetPlan.find((m) => !m.skipped)?.dueDate)}.
               {' '}The new level's books are charged too.
             </div>
@@ -83,7 +83,7 @@ const PromoteModal = ({ open, onClose, group, onSaved, onCreateNext }) => {
           <label key={e._id} className="d-flex align-items-center gap-3 px-3 py-2 border-bottom cursor-pointer">
             <input type="checkbox" className="form-check-input m-0" checked={selected.includes(e.student._id)} onChange={() => toggle(e.student._id)} />
             <span className="flex-grow-1 fw-600">{fullName(e.student)}</span>
-            {e.finalScore !== undefined && e.finalScore !== null && <Badge tone="gray">{e.finalScore}</Badge>}
+            {e.finalScore !== undefined && e.finalScore !== null && <Badge tone="gray">{e.finalScore}%</Badge>}
             <StatusBadge map={FINAL_RESULTS} value={e.finalResult} />
           </label>
         ))}

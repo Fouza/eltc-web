@@ -37,8 +37,7 @@ const SchoolTab = () => {
           <div className="row">
             <div className="col-6"><Field label="Currency" hint="DZD, MAD, EUR…"><input className="form-control" value={f.currency ?? ''} onChange={(e) => setF({ ...f, currency: e.target.value.toUpperCase() })} maxLength={4} /></Field></div>
             <div className="col-6"><Field label="Number format"><select className="form-select" value={f.locale ?? 'fr-FR'} onChange={(e) => setF({ ...f, locale: e.target.value })}><option value="fr-FR">1 234,5</option><option value="en-GB">1,234.5</option></select></Field></div>
-            <div className="col-6"><Field label="Exams graded out of"><input type="number" className="form-control" {...num('defaultMaxScore')} /></Field></div>
-            <div className="col-6"><Field label="Default pass mark"><input type="number" className="form-control" {...num('defaultPassScore')} /></Field></div>
+            <div className="col-6"><Field label="Default pass mark" hint="Exam scores are in percent"><div className="input-group"><input type="number" min="0" max="100" className="form-control" {...num('defaultPassScore')} /><span className="input-group-text">%</span></div></Field></div>
           </div>
         </Card>
       </div>

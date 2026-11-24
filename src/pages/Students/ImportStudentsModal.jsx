@@ -13,6 +13,7 @@ const FIELDS = [
   ['phone', 'Phone', ['telephone', 'téléphone', 'tel', 'tél', 'tél.', 'phone', 'mobile', 'portable']],
   ['email', 'Email', ['email', 'mail', 'e-mail']],
   ['birthDate', 'Birth date (YYYY-MM-DD)', ['date de naissance', 'birth date', 'birthdate', 'naissance']],
+  ['birthPlace', 'Place of birth', ['lieu de naissance', 'lieu naissance', 'place of birth', 'birthplace', 'birth place', 'né à', 'née à', 'né(e) à']],
   ['gender', 'Gender', ['sexe', 'gender', 'genre']],
   ['address', 'Address', ['adresse', 'address']],
   ['city', 'City', ['ville', 'city']],
@@ -61,7 +62,7 @@ const ImportStudentsModal = ({ open, onClose, onDone }) => {
   };
 
   const template = () =>
-    downloadFile(`${FIELDS.map(([, label]) => label).join(';')}\nMarie;Dupont;0550123456;marie@mail.com;1995-04-12;F;12 rue Didouche;Centre;Engineer;;;\n`, 'students-template.csv');
+    downloadFile(`${FIELDS.map(([, label]) => label).join(';')}\nMarie;Dupont;0550123456;marie@mail.com;1995-04-12;Alger;F;12 rue Didouche;Centre;Engineer;;;\n`, 'students-template.csv');
 
   return (
     <Modal

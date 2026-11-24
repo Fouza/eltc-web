@@ -65,3 +65,18 @@ export const NOTIFICATION_TYPES = {
   group_ended: 'Group ended',
 };
 export const SOURCES = ['Facebook', 'Instagram', 'Friend', 'Walk-in', 'Google', 'Former student', 'Other'];
+
+// Certificates (copy of eltc-api/src/constants/enums.js MENTIONS — keep in sync).
+export const CERTIFICATE_STATUS = {
+  ready: { label: 'Ready to collect', tone: 'amber' },
+  handed: { label: 'Handed over', tone: 'green' },
+  revoked: { label: 'Revoked', tone: 'red' },
+};
+export const CERTIFICATE_RECEIVERS = { student: 'The student', guardian: 'Parent / guardian', other: 'Someone else' };
+export const MENTIONS = [
+  { min: 80, label: 'Very good' },
+  { min: 70, label: 'Good' },
+  { min: 60, label: 'Fairly good' },
+  { min: 0, label: 'Pass' },
+];
+export const mentionFor = (score) => (typeof score === 'number' ? MENTIONS.find((m) => score >= m.min).label : null);

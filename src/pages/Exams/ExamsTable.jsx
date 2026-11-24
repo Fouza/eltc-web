@@ -32,7 +32,7 @@ const ExamsTable = ({ params, group, title, refreshKey }) => {
                     {!group && <td><div className="fw-600">{e.group?.name}</div><div className="fs-12 fg-subtle">{e.program?.name} · {levelName(e.levelNumber, e.program)}</div></td>}
                     <td><div>{formatDate(e.date)}</div><div className="fs-12 fg-subtle">{fromNow(e.date)}</div></td>
                     <td className="num">{e.stats.graded}</td>
-                    <td className="num fw-700">{e.stats.average ?? '—'}{e.stats.average !== null && <span className="fg-subtle fw-400"> /{e.maxScore}</span>}</td>
+                    <td className="num fw-700">{e.stats.average === null || e.stats.average === undefined ? '—' : `${e.stats.average}%`}</td>
                     <td className="num">{percent(e.stats.passRate)}</td>
                     <td>{e.status === 'graded' ? <Badge tone="green" dot>Graded</Badge> : late ? <Badge tone="red" dot>Results missing</Badge> : <Badge tone="cyan" dot>Upcoming</Badge>}</td>
                   </tr>

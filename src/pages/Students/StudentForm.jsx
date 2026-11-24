@@ -10,7 +10,7 @@ import { Button, Card, Field, Loader, PageHeader } from '@components';
 import { SOURCES, STUDENT_STATUS } from '@data/enums';
 
 const EMPTY = {
-  firstName: '', lastName: '', gender: '', birthDate: '', phone: '', email: '', address: '', city: '', occupation: '',
+  firstName: '', lastName: '', gender: '', birthDate: '', birthPlace: '', phone: '', email: '', address: '', city: '', occupation: '',
   guardian: { name: '', relation: '', phone: '', email: '' },
   campus: '', status: 'prospect', registeredAt: todayInput(), desiredProgram: '', desiredLevel: '', preferredSlots: '', source: '', notes: '',
 };
@@ -101,7 +101,8 @@ const StudentForm = () => {
                 </Field>
               </div>
               <div className="col-sm-4"><Field label="Birth date" hint={years !== null ? `${years} years old` : undefined}><input type="date" className="form-control" {...bind('birthDate')} /></Field></div>
-              <div className="col-sm-4"><Field label="Occupation / school"><input className="form-control" {...bind('occupation')} placeholder="Engineer, pupil, student…" /></Field></div>
+              <div className="col-sm-4"><Field label="Place of birth"><input className="form-control" {...bind('birthPlace')} placeholder="Alger, Tizi Ouzou…" /></Field></div>
+              <div className="col-sm-6"><Field label="Occupation / school"><input className="form-control" {...bind('occupation')} placeholder="Engineer, pupil, student…" /></Field></div>
             </div>
           </Card>
           <Card title="Contact" icon={Contact} className="mb-3">

@@ -1,0 +1,31 @@
+@use 'variables' as *;
+
+// A4 landscape sheets. Fixed light colours: a certificate is paper, even when the app is in dark mode.
+.sheets { display: flex; flex-direction: column; align-items: center; gap: 24px; overflow-x: auto; padding-bottom: 24px; @media print { display: block; gap: 0; padding: 0; overflow: visible; } }
+.sheet {
+  width: 297mm; height: 210mm; flex-shrink: 0; background: #fff; color: #101828; position: relative; box-shadow: 0 8px 30px rgba(16, 24, 40, 0.12);
+  padding: 12mm; font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  @media print { box-shadow: none; break-after: page; &:last-child { break-after: auto; } }
+}
+.frame {
+  height: 100%; border: 1.2mm solid #064ca5; border-radius: 3mm; position: relative; padding: 10mm 16mm 9mm; display: flex; flex-direction: column; text-align: center;
+  &::before { content: ''; position: absolute; inset: 2.2mm; border: 0.3mm solid #7b3fe4; border-radius: 2mm; pointer-events: none; }
+}
+.ribbon { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 70mm; height: 2.6mm; background: linear-gradient(90deg, #064ca5, #7b3fe4); border-radius: 0 0 2mm 2mm; }
+.head { display: flex; align-items: center; justify-content: center; gap: 4mm; }
+.logo { width: 13mm; height: 13mm; border-radius: 3.5mm; background: linear-gradient(135deg, #064ca5, #7b3fe4); color: #fff; font-weight: 800; font-size: 7mm; display: grid; place-items: center; }
+.school { font-weight: 800; font-size: 6mm; letter-spacing: -0.01em; }
+.campus { font-size: 3.2mm; color: #667085; }
+.title { margin-top: 7mm; font-size: 4mm; font-weight: 800; letter-spacing: 0.45em; color: #064ca5; text-transform: uppercase; }
+.lead { margin-top: 6mm; font-size: 4mm; color: #475467; }
+.name { font-family: Georgia, 'Times New Roman', serif; font-size: 13mm; font-weight: 700; color: #101828; margin: 2mm 0 1mm; line-height: 1.1; }
+.born { font-size: 3.6mm; color: #667085; }
+.level { margin-top: 5mm; font-size: 4.2mm; color: #475467; b { display: block; font-size: 8mm; color: #101828; margin-top: 1.5mm; letter-spacing: -0.01em; } }
+.details { margin-top: 3mm; font-size: 3.6mm; color: #475467; }
+.mention { display: inline-block; margin-top: 4mm; padding: 1.5mm 5mm; border-radius: 10mm; background: #eff4ff; color: #064ca5; font-weight: 700; font-size: 3.8mm; }
+.foot { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: end; gap: 8mm; text-align: left; font-size: 3.2mm; color: #475467; }
+.issued b { display: block; color: #101828; font-size: 3.6mm; }
+.sign { text-align: center; div { border-top: 0.3mm dashed #98a2b3; padding-top: 1.5mm; margin: 0 6mm; } }
+.qr { display: flex; justify-content: flex-end; align-items: flex-end; gap: 3mm; text-align: right; font-size: 2.7mm; color: #667085; img { width: 22mm; height: 22mm; } b { display: block; color: #101828; font-size: 3mm; } }
+.revokedStamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-18deg); border: 1.5mm solid #d92d20; color: #d92d20; font-size: 16mm; font-weight: 800; padding: 2mm 8mm; border-radius: 4mm; opacity: 0.75; letter-spacing: 0.1em; }

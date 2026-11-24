@@ -71,7 +71,7 @@ const ExamDetail = () => {
       <PageHeader
         breadcrumb={[{ label: 'Exams', to: '/exams' }, { label: exam.title }]}
         title={<span className="d-inline-flex gap-2 align-items-center">{exam.title} <StatusBadge map={EXAM_TYPES} value={exam.type} dot={false} /></span>}
-        subtitle={<><Link to={`/groups/${exam.group?._id}`}>{exam.group?.name}</Link> · {exam.program?.name} {levelName(exam.levelNumber, exam.program)} · {formatDate(exam.date)} · graded /{exam.maxScore}, pass at {exam.passScore}</>}
+        subtitle={<><Link to={`/groups/${exam.group?._id}`}>{exam.group?.name}</Link> · {exam.program?.name} {levelName(exam.levelNumber, exam.program)} · {formatDate(exam.date)} · scores in %, pass at {exam.passScore}%</>}
         actions={canEdit && (
           <>
             <Button variant="secondary" icon={Pencil} onClick={() => setEditing(true)}>Edit</Button>
@@ -81,15 +81,15 @@ const ExamDetail = () => {
       />
       <div className="row g-3 mb-3">
         <div className="col-6 col-lg-3"><StatCard label="Graded" value={`${stats.graded}/${rows.length}`} tone="blue" /></div>
-        <div className="col-6 col-lg-3"><StatCard label="Average" value={stats.average ?? '—'} hint={`out of ${exam.maxScore}`} tone="purple" /></div>
+        <div className="col-6 col-lg-3"><StatCard label="Average" value={stats.average === null || stats.average === undefined ? '—' : `${stats.average}%`} tone="purple" /></div>
         <div className="col-6 col-lg-3"><StatCard label="Passed" value={stats.passed} hint={stats.graded ? `${Math.round((stats.passed / stats.graded) * 100)}%` : ''} tone="green" /></div>
-        <div className="col-6 col-lg-3"><StatCard label="Best score" value={stats.best ?? '—'} tone="amber" /></div>
+        <div className="col-6 col-lg-3"><StatCard label="Best score" value={stats.best === null || stats.best === undefined ? '—' : `${stats.best}%`} tone="amber" /></div>
       </div>
       <Card padded={false} title="Results" subtitle="Type a score and press Enter to go to the next student." actions={canEdit && <Button icon={Save} loading={saving} disabled={!dirty || rows.some(invalid)} onClick={save}>Save results</Button>}>
         {rows.length ? (
           <div className="table-scroll mt-3">
             <table className="table-eltc">
-              <thead><tr><th style={{ width: 40 }}>#</th><th>Student</th><th style={{ width: 150 }}>Score / {exam.maxScore}</th><th style={{ width: 90 }}>Absent</th><th>Comment</th><th style={{ width: 100 }}>Result</th></tr></thead>
+              <thead><tr><th style={{ width: 40 }}>#</th><th>Student</th><th style={{ width: 150 }}>Score (%)</th><th style={{ width: 90 }}>Absent</th><th>Comment</th><th style={{ width: 100 }}>Result</th></tr></thead>
               <tbody>
                 {rows.map((r, i) => {
                   const has = r.score !== '' && !r.absent;
@@ -102,7 +102,7 @@ const ExamDetail = () => {
                         <input
                           ref={(el) => { inputs.current[i] = el; }}
                           className={`form-control form-control-sm ${styles.score} ${invalid(r) ? 'is-invalid' : ''}`}
-                          type="number" step="0.25" min="0" max={exam.maxScore} inputMode="decimal"
+                          type="number" step="0.5" min="0" max={exam.maxScore} inputMode="decimal"
                           value={r.absent ? '' : r.score}
                           disabled={r.absent || !canEdit}
                           onChange={(e) => set(i, { score: e.target.value })}

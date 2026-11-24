@@ -184,7 +184,7 @@ const GroupDetail = () => {
                       <td>{e.student.phone ?? e.student.guardian?.phone}</td>
                       <td className={`num fw-600 ${e.attendance?.rate < 75 ? 'fg-red' : ''}`}>{percent(e.attendance?.rate)}{e.attendance?.absent ? <div className="fs-12 fg-subtle">{e.attendance.absent} absences</div> : null}</td>
                       {canFinance && <td className="num">{e.balance > 0 ? <span className={e.overdue > 0 ? 'fg-red fw-700' : 'fw-600'}>{money(e.balance)}</span> : <Badge tone="green">Paid</Badge>}</td>}
-                      <td><StatusBadge map={FINAL_RESULTS} value={e.finalResult} dot={false} />{e.finalScore !== undefined && e.finalScore !== null && <span className="fs-12 fg-muted ms-1">{e.finalScore}</span>}</td>
+                      <td><StatusBadge map={FINAL_RESULTS} value={e.finalResult} dot={false} />{e.finalScore !== undefined && e.finalScore !== null && <span className="fs-12 fg-muted ms-1">{e.finalScore}%</span>}</td>
                       <td><StatusBadge map={ENROLLMENT_STATUS} value={e.status} /></td>
                     </tr>
                   ))}

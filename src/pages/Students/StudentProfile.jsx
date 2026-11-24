@@ -10,7 +10,7 @@ import { toast } from '@helpers/toast';
 import { useConfirm } from '@context/ConfirmContext';
 import { Avatar, Badge, Button, Card, Dropdown, EmptyState, Field, Loader, Modal, PageHeader, StatusBadge, Tabs } from '@components';
 import { CAN } from '@data/roles';
-import { ATTENDANCE_STATUS, ENROLLMENT_STATUS, EXAM_TYPES, FINAL_RESULTS, INVOICE_STATUS, PAYMENT_METHODS, STUDENT_STATUS } from '@data/enums';
+import { ATTENDANCE_STATUS, CERTIFICATE_STATUS, ENROLLMENT_STATUS, EXAM_TYPES, FINAL_RESULTS, INVOICE_STATUS, PAYMENT_METHODS, STUDENT_STATUS } from '@data/enums';
 import RecordPaymentModal from '@pages/Payments/RecordPaymentModal';
 import InvoiceFormModal from '@pages/Payments/InvoiceFormModal';
 import EnrollModal from './EnrollModal';
@@ -68,12 +68,13 @@ const StudentProfile = () => {
 
   if (loading && !data) return <Loader full />;
   if (!data) return <EmptyState title="Student not found" />;
-  const { student: s, enrollments, invoices, payments, finance, attendance, grades } = data;
+  const { student: s, enrollments, invoices, payments, finance, attendance, grades, certificates = [] } = data;
+  const certificateOf = (e) => certificates.find((c) => c.enrollment === e._id && c.status !== 'revoked');
   const active = enrollments.filter((e) => e.status === 'active');
   const setTab = (t) => setParams({ tab: t });
 
   const leaveGroup = async (e) => {
-    if (!(await confirm({ title: `Remove from ${e.group?.name}?`, message: 'The student leaves the group. The current month stays due; the months that haven\'t started yet are cancelled.', danger: true, confirmLabel: 'Remove' }))) return;
+    if (!(await confirm({ title: `Remove from ${e.group?.name}?`, message: 'The student leaves the group. The current 4-week block stays due; the blocks that haven\'t started yet are cancelled.', danger: true, confirmLabel: 'Remove' }))) return;
     try {
       await enrollmentsApi.update(e._id, { status: 'dropped' });
       toast.success('Student removed from the group');
@@ -166,7 +167,18 @@ const StudentProfile = () => {
                     <InfoRow label="Campus">{e.group?.campus?.name}</InfoRow>
                     <InfoRow label="Dates">{formatDate(e.group?.startDate)} → {formatDate(e.group?.endDate)}</InfoRow>
                     <InfoRow label="Fee">{money(e.fee)}{e.discount > 0 && <span className="fg-green fs-12"> −{money(e.discount)} ({e.discountReason ?? 'discount'})</span>}</InfoRow>
-                    {e.finalScore !== undefined && e.finalScore !== null && <InfoRow label="Final score">{e.finalScore}</InfoRow>}
+                    {e.finalScore !== undefined && e.finalScore !== null && <InfoRow label="Final score">{e.finalScore}%</InfoRow>}
+                    {e.finalResult === 'passed' && (
+                      <InfoRow label="Certificate">
+                        {certificateOf(e) ? (
+                          <Link to={`/certificates?tab=${certificateOf(e).status}&q=${certificateOf(e).number}`}>
+                            {certificateOf(e).number} · {CERTIFICATE_STATUS[certificateOf(e).status].label}
+                          </Link>
+                        ) : (
+                          <Link to={`/certificates?q=${encodeURIComponent(s.lastName)}`}>Not issued yet</Link>
+                        )}
+                      </InfoRow>
+                    )}
                   </div>
                   {canEnroll && e.status === 'active' && (
                     <div className="d-flex gap-2 flex-wrap mt-3">
@@ -273,7 +285,7 @@ const StudentProfile = () => {
                         <td><StatusBadge map={EXAM_TYPES} value={g.type} dot={false} /></td>
                         <td>{g.group?.name}</td>
                         <td>{formatDate(g.date)}</td>
-                        <td className="num">{g.result?.absent ? <Badge tone="gray">Absent</Badge> : <b className={passed ? 'fg-green' : 'fg-red'}>{g.result?.score} / {g.maxScore}</b>}</td>
+                        <td className="num">{g.result?.absent ? <Badge tone="gray">Absent</Badge> : <b className={passed ? 'fg-green' : 'fg-red'}>{g.result?.score}%</b>}</td>
                         <td className="fg-muted">{g.result?.comment}</td>
                       </tr>
                     );
@@ -291,6 +303,7 @@ const StudentProfile = () => {
             <Card title="Student">
               <InfoRow label="Gender">{s.gender === 'female' ? 'Female' : s.gender === 'male' ? 'Male' : null}</InfoRow>
               <InfoRow label="Birth date">{s.birthDate && `${formatDate(s.birthDate)} (${age(s.birthDate)} y/o)`}</InfoRow>
+              <InfoRow label="Place of birth">{s.birthPlace}</InfoRow>
               <InfoRow label="Occupation">{s.occupation}</InfoRow>
               <InfoRow label="Phone">{s.phone}</InfoRow>
               <InfoRow label="Email">{s.email}</InfoRow>

@@ -48,6 +48,7 @@ const StudentsList = () => {
         { label: 'Guardian phone', value: (s) => s.guardian?.phone },
         { label: 'Email', value: (s) => s.email },
         { label: 'Birth date', value: (s) => (s.birthDate ? dayjs(s.birthDate).format('YYYY-MM-DD') : '') },
+        { label: 'Place of birth', value: (s) => s.birthPlace ?? '' },
         { label: 'Campus', value: (s) => s.campus?.name },
         { label: 'Groups', value: (s) => s.groups.map((g) => g.name).join(', ') },
         { label: 'Status', value: (s) => STUDENT_STATUS[s.status]?.label },

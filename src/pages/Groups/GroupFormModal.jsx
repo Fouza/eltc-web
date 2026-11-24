@@ -153,7 +153,7 @@ const GroupFormModal = ({ open, onClose, onSaved, group, prefill }) => {
           {options.map((o) => {
             const on = chosen === o.key;
             return (
-              <div key={o.key} className={audience === 'children' ? 'col-sm-6 col-lg-3' : 'col-md-4'}>
+              <div key={o.key} className="col-sm-6 col-md-4">
                 <label className={`d-flex gap-2 p-2 px-3 rounded-3 border h-100 cursor-pointer ${on ? 'border-primary bg-blue-50' : ''}`}>
                   <input type="radio" name="session" className="form-check-input mt-1" checked={on} onChange={() => update({ sessions: o.sessions })} />
                   <div><div className="fw-700 fs-13">{o.label}</div><div className="fs-12 fg-muted">{o.detail}</div></div>

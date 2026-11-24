@@ -1,0 +1,21 @@
+@use 'variables' as *;
+
+.warn {
+  display: flex; gap: 10px; align-items: flex-start; background: $amber-50; color: $amber-ink; border-radius: $radius; padding: 12px 14px; margin-bottom: 14px; font-size: 13.5px;
+  svg { flex-shrink: 0; margin-top: 1px; }
+}
+.bulk {
+  position: sticky; top: calc(#{$topbar-height} + 8px); z-index: 5; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: $surface; border: 1px solid $blue-100; box-shadow: $shadow-blue; border-radius: $radius-lg; padding: 10px 14px; margin-bottom: 12px;
+  b { margin-right: auto; color: $ink; }
+}
+.on td { background: $blue-50; }
+tr:has(input[type='checkbox']) { cursor: pointer; }
+
+// ---- Verification page (public)
+.verifyWrap { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+.verifyCard { width: 100%; max-width: 520px; background: $surface; border: 1px solid $line; border-radius: $radius-lg; box-shadow: $shadow-lg; padding: 28px; }
+.verdict { display: flex; gap: 12px; align-items: center; border-radius: $radius; padding: 14px 16px; margin: 18px 0; font-weight: 700; }
+.valid { background: $green-50; color: $green-ink; }
+.revoked, .unknown { background: $red-50; color: $red-ink; }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 14px; dt { color: $muted; font-weight: 500; } dd { margin: 0; color: $ink; font-weight: 600; } }

@@ -18,14 +18,14 @@ const ExamFormModal = ({ open, onClose, onSaved, exam, group: fixedGroup }) => {
     if (!fixedGroup && !exam) groupsApi.list({ status: 'ongoing,planned', campus }).then(setGroups);
     setF(exam
       ? { ...exam, date: toInputDate(exam.date) }
-      : { group: fixedGroup?._id ?? '', title: '', type: 'quiz', date: todayInput(), maxScore: settings?.defaultMaxScore ?? 20, passScore: settings?.defaultPassScore ?? 10, coefficient: 1 });
+      : { group: fixedGroup?._id ?? '', title: '', type: 'quiz', date: todayInput(), passScore: settings?.defaultPassScore ?? 50, coefficient: 1 });
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (k, v) => setF((x) => ({ ...x, [k]: v }));
   const save = async () => {
     setSaving(true);
     try {
-      const data = { group: f.group, title: f.title, type: f.type, date: f.date, maxScore: Number(f.maxScore), passScore: Number(f.passScore), coefficient: Number(f.coefficient), notes: f.notes };
+      const data = { group: f.group, title: f.title, type: f.type, date: f.date, passScore: Number(f.passScore), coefficient: Number(f.coefficient), notes: f.notes };
       const saved = exam ? await examsApi.update(exam._id, data) : await examsApi.create(data);
       toast.success(exam ? 'Exam updated' : 'Exam scheduled');
       onSaved?.(saved);
@@ -38,7 +38,7 @@ const ExamFormModal = ({ open, onClose, onSaved, exam, group: fixedGroup }) => {
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={exam ? 'Edit exam' : 'Schedule an exam'} footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button loading={saving} disabled={!f.group || !f.title || !f.date} onClick={save}>Save</Button></>}>
+    <Modal open={open} onClose={onClose} title={exam ? 'Edit exam' : 'Schedule an exam'} footer={<><Button variant="secondary" onClick={onClose}>Cancel</Button><Button loading={saving} disabled={!f.group || !f.title || !f.date || f.passScore === '' || Number(f.passScore) < 0 || Number(f.passScore) > 100} onClick={save}>Save</Button></>}>
       {!fixedGroup && !exam && (
         <Field label="Group" required>
           <select className="form-select" value={f.group ?? ''} onChange={(e) => set('group', e.target.value)}>
@@ -58,8 +58,11 @@ const ExamFormModal = ({ open, onClose, onSaved, exam, group: fixedGroup }) => {
         </div>
         <div className="col-sm-6"><Field label="Date" required><input type="date" className="form-control" value={f.date ?? ''} onChange={(e) => set('date', e.target.value)} /></Field></div>
         <div className="col-sm-6"><Field label="Weight" hint="Coefficient for averages"><input type="number" min="0" step="0.5" className="form-control" value={f.coefficient ?? 1} onChange={(e) => set('coefficient', e.target.value)} /></Field></div>
-        <div className="col-sm-6"><Field label="Graded out of"><input type="number" min="1" className="form-control" value={f.maxScore ?? ''} onChange={(e) => set('maxScore', e.target.value)} /></Field></div>
-        <div className="col-sm-6"><Field label="Pass mark"><input type="number" min="0" className="form-control" value={f.passScore ?? ''} onChange={(e) => set('passScore', e.target.value)} /></Field></div>
+        <div className="col-sm-6">
+          <Field label="Pass mark" hint="Scores are typed in percent (0–100)">
+            <div className="input-group"><input type="number" min="0" max="100" className="form-control" value={f.passScore ?? ''} onChange={(e) => set('passScore', e.target.value)} /><span className="input-group-text">%</span></div>
+          </Field>
+        </div>
       </div>
     </Modal>
   );

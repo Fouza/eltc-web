@@ -21,6 +21,12 @@ export const routeConfig = [
     children: [{ index: true, page: Login }],
   },
   {
+    // Public certificate check (the QR code printed on each certificate). Works signed in or not.
+    path: '/verify/:code',
+    layout: PublicLayout,
+    children: [{ index: true, page: page(() => import('@pages/Certificates/Verify')) }],
+  },
+  {
     path: '/',
     layout: AppLayout,
     auth: true,
@@ -38,6 +44,8 @@ export const routeConfig = [
       { path: 'attendance', page: page(() => import('@pages/Attendance/AttendanceEntry')) },
       { path: 'exams', page: page(() => import('@pages/Exams/ExamsList')) },
       { path: 'exams/:id', page: page(() => import('@pages/Exams/ExamDetail')) },
+      { path: 'certificates', page: page(() => import('@pages/Certificates/Certificates')), roles: CAN.manageCertificates },
+      { path: 'certificates/print', page: page(() => import('@pages/Certificates/CertificatePrint')), roles: CAN.manageCertificates },
       { path: 'payments', page: page(() => import('@pages/Payments/Payments')), roles: CAN.viewFinance },
       { path: 'payments/:id/receipt', page: page(() => import('@pages/Payments/Receipt')), roles: CAN.viewFinance },
       { path: 'programs', page: page(() => import('@pages/Programs/Programs')) },

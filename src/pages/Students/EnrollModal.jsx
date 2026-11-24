@@ -4,10 +4,10 @@ import { booksApi, groupsApi, enrollmentsApi } from '@api/endpoints';
 import { Button, Field, Modal, ProgressBar, StudentPicker, Badge, Segmented } from '@components';
 import { money, scheduleLabel, todayInput, fullName, formatDate, levelName } from '@helpers/format';
 import { toast } from '@helpers/toast';
-import { buildMonthlyPlan } from '@helpers/paymentPlan';
+import { buildMonthlyPlan, weeksLabel } from '@helpers/paymentPlan';
 
 // Put a student in a group: fee comes from the level (or the group), discount, then the payment plan.
-// Monthly (default): the fee split by the level's months, due at the start of each month. Custom: a hand-made split.
+// Every 4 weeks (default): the fee paid in 4-week blocks, each due on its first day. Custom: a hand-made split.
 const EnrollModal = ({ open, onClose, onSaved, student: fixedStudent, group: fixedGroup }) => {
   const [student, setStudent] = useState(null);
   const [groups, setGroups] = useState([]);
@@ -136,18 +136,18 @@ const EnrollModal = ({ open, onClose, onSaved, student: fixedStudent, group: fix
                 size="sm"
                 value={form.plan}
                 onChange={(plan) => setForm({ ...form, plan })}
-                options={[{ value: 'monthly', label: 'Monthly' }, { value: 'custom', label: 'Custom' }]}
+                options={[{ value: 'monthly', label: 'Every 4 weeks' }, { value: 'custom', label: 'Custom' }]}
               />
             </div>
             {form.plan === 'monthly' ? (
               <div className="border rounded-4">
                 <div className="px-3 py-2 fs-12 fg-muted border-bottom">
-                  {weeks} weeks = {monthly.months} month{monthly.months > 1 ? 's' : ''} · {money(monthly.perMonth)} per month, due at the start of each month. Overdue when a month passes unpaid.
+                  {monthly.weeks} weeks = {monthly.blocks} block{monthly.blocks > 1 ? 's' : ''} of 4 weeks · {money(monthly.perBlock)} per block, due on its first day. Overdue when the next block starts unpaid.
                 </div>
                 {monthly.plan.map((m) => (
                   <div key={m.index} className={`d-flex justify-content-between align-items-center px-3 py-2 border-bottom fs-13 ${m.skipped ? 'fg-subtle' : ''}`}>
-                    <span className="fw-600">Month {m.index}{m.share < 1 ? ' (half)' : ''}</span>
-                    <span>{m.skipped ? 'Already over: not charged' : `Due ${formatDate(m.dueDate)}`}</span>
+                    <span className="fw-600">{weeksLabel(m)}</span>
+                    <span>{m.skipped ? 'Already over: not charged' : `Due ${formatDate(m.dueDate)} · overdue from ${formatDate(m.overdueAt)}`}</span>
                     <b className="tabular">{m.skipped ? '—' : money(m.amount)}</b>
                   </div>
                 ))}
@@ -191,7 +191,7 @@ const EnrollModal = ({ open, onClose, onSaved, student: fixedStudent, group: fix
           <div className="col-12">
             <div className="d-flex justify-content-between align-items-center p-3 rounded-4 border">
               <span className="fw-600">
-                Total to pay{form.plan === 'monthly' && toPay < net ? ` (remaining months of ${money(net)})` : ''}
+                Total to pay{form.plan === 'monthly' && toPay < net ? ` (weeks left, out of ${money(net)})` : ''}
                 {booksTotal > 0 && <span className="d-block fs-12 fg-muted fw-500">{money(toPay)} course + {money(booksTotal)} books</span>}
               </span>
               <b className="fs-20 fg-blue tabular">{money(toPay + booksTotal)}</b>

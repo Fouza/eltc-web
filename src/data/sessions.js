@@ -7,6 +7,7 @@ export const SESSIONS = [
   { key: 'sat_mid', label: 'Saturday Midday', day: 6, startTime: '11:00', endTime: '14:00', audiences: ['children'] },
   { key: 'sat_pm', label: 'Saturday Afternoon', day: 6, startTime: '14:00', endTime: '17:00', audiences: ['adults', 'children'] },
   { key: 'eve_sun', label: 'Evening Sun', day: 0, startTime: '17:00', endTime: '19:00', audiences: ['adults'] },
+  { key: 'tue_pm', label: 'Tuesday Afternoon', day: 2, startTime: '13:30', endTime: '16:30', audiences: ['children'] },
   { key: 'eve_tue', label: 'Evening Tue', day: 2, startTime: '17:00', endTime: '19:00', audiences: ['adults'] },
   { key: 'eve_thu', label: 'Evening Thu', day: 4, startTime: '17:00', endTime: '19:00', audiences: ['adults'] },
   { key: 'fri_am', label: 'Friday Morning', day: 5, startTime: '08:30', endTime: '11:30', audiences: ['adults', 'children'] },
