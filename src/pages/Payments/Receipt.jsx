@@ -15,7 +15,7 @@ const Receipt = () => {
   const { data: p, loading } = useApi(() => paymentsApi.get(id), [id]);
   if (loading) return <Loader full />;
   if (!p) return null;
-  const remaining = p.invoice ? p.invoice.amount - p.invoice.paidAmount : 0;
+  const lines = p.lines ?? [p];
 
   return (
     <>
@@ -54,25 +54,24 @@ const Receipt = () => {
           </div>
         </div>
         <table className={`table-eltc mt-4 ${styles.table}`}>
-          <thead><tr><th>Description</th><th className="num">Invoice total</th><th className="num">Paid now</th></tr></thead>
+          <thead><tr><th>Description</th><th className="num">Invoice total</th><th className="num">Paid now</th><th className="num">Still due</th></tr></thead>
           <tbody>
-            <tr>
-              <td>
-                <div className="fw-600">{p.invoice?.label}</div>
-                <div className="fs-12 fg-subtle">{p.invoice?.number} · due {formatDate(p.invoice?.dueDate)}</div>
-              </td>
-              <td className="num">{money(p.invoice?.amount)}</td>
-              <td className="num fw-700">{money(p.amount)}</td>
-            </tr>
+            {lines.map((l) => (
+              <tr key={l._id}>
+                <td>
+                  <div className="fw-600">{l.invoice?.label}</div>
+                  <div className="fs-12 fg-subtle">{l.invoice?.number} · due {formatDate(l.invoice?.dueDate)}</div>
+                </td>
+                <td className="num">{money(l.invoice?.amount)}</td>
+                <td className="num fw-700">{money(l.amount)}</td>
+                <td className="num">{money((l.invoice?.amount ?? 0) - (l.invoice?.paidAmount ?? 0))}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
         <div className={styles.total}>
           <span>Amount received</span>
-          <b>{money(p.amount)}</b>
-        </div>
-        <div className="d-flex justify-content-between fs-13 fg-muted mt-2">
-          <span>Remaining on this invoice</span>
-          <span className="fw-700 fg-ink">{money(remaining)}</span>
+          <b>{money(p.total ?? p.amount)}</b>
         </div>
         <div className={styles.footer}>
           <div>Received by {fullName(p.receivedBy)} · {formatDateTime(p.createdAt)}</div>

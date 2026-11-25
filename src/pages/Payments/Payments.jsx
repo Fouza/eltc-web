@@ -182,7 +182,7 @@ const PaymentsTab = ({ refreshKey }) => {
   const { data, loading, reload } = useApi(() => paymentsApi.list({ ...range, method, campus, page }), [range, method, campus, page, refreshKey]);
 
   const remove = async (p) => {
-    if (!(await confirm({ title: `Delete receipt ${p.receiptNumber}?`, message: 'The invoice will be marked as unpaid again. Use this only to fix a mistake.', danger: true, confirmLabel: 'Delete' }))) return;
+    if (!(await confirm({ title: `Delete receipt ${p.receipt ?? p.receiptNumber}?`, message: 'The whole receipt is deleted (every invoice it paid) and those invoices are unpaid again. Use this only to fix a mistake.', danger: true, confirmLabel: 'Delete' }))) return;
     try {
       await paymentsApi.remove(p._id);
       toast.success('Payment deleted');

@@ -37,12 +37,25 @@ const RecordPaymentModal = ({ open, onClose, onSaved, student: fixedStudent, inv
 
   const invoice = invoices.find((i) => i._id === invoiceId);
   const remaining = invoice ? invoice.amount - invoice.paidAmount : 0;
+  const owed = invoices.reduce((s, i) => s + i.amount - i.paidAmount, 0);
+  const amount = Number(form.amount);
+  // Same split as the API: the chosen invoice first, then the others by due date.
+  const spread = [];
+  if (invoice && amount > remaining) {
+    let left = amount - remaining;
+    for (const inv of invoices.filter((i) => i._id !== invoiceId).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))) {
+      if (left <= 0) break;
+      const part = Math.min(left, inv.amount - inv.paidAmount);
+      spread.push({ inv, part });
+      left -= part;
+    }
+  }
 
   const save = async (print) => {
     setSaving(true);
     try {
       const payment = await paymentsApi.create({ invoiceId, ...form, amount: Number(form.amount) });
-      toast.success('Payment recorded', `${money(payment.amount)} · receipt ${payment.receiptNumber}`);
+      toast.success('Payment recorded', `${money(payment.total ?? payment.amount)} · receipt ${payment.receiptNumber}${payment.lines?.length > 1 ? ` · ${payment.lines.length} invoices` : ''}`);
       onSaved?.(payment);
       onClose();
       if (print) navigate(`/payments/${payment._id}/receipt`);
@@ -53,7 +66,7 @@ const RecordPaymentModal = ({ open, onClose, onSaved, student: fixedStudent, inv
     }
   };
 
-  const valid = invoice && Number(form.amount) > 0 && Number(form.amount) <= remaining;
+  const valid = invoice && amount > 0 && amount <= owed;
   return (
     <Modal
       open={open}
@@ -96,10 +109,29 @@ const RecordPaymentModal = ({ open, onClose, onSaved, student: fixedStudent, inv
       {invoice && (
         <div className="row g-3">
           <div className="col-sm-6">
-            <Field label="Amount" required hint={`Remaining: ${money(remaining)}`} error={Number(form.amount) > remaining ? 'Higher than what remains' : undefined}>
+            <Field
+              label="Amount"
+              required
+              hint={owed > remaining ? `This one: ${money(remaining)} · everything owed: ${money(owed)}` : `Remaining: ${money(remaining)}`}
+              error={amount > owed ? `More than everything the student owes (${money(owed)})` : undefined}
+            >
               <input className="form-control" type="number" min="0" step="any" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
             </Field>
           </div>
+          {spread.length > 0 && amount <= owed && (
+            <div className="col-12 order-sm-last">
+              <div className="p-3 rounded-3 bg-blue-50 fs-13">
+                <div className="fw-700 mb-1">{money(amount - remaining)} more than this line: it also pays</div>
+                {spread.map(({ inv, part }) => (
+                  <div key={inv._id} className="d-flex justify-content-between">
+                    <span className="text-ellipsis">{inv.label} <span className="fg-subtle">· due {formatDate(inv.dueDate)}</span></span>
+                    <b className="tabular ms-3">{money(part)}{part < inv.amount - inv.paidAmount ? ' (part)' : ''}</b>
+                  </div>
+                ))}
+                <div className="fg-muted mt-1">All on one receipt.</div>
+              </div>
+            </div>
+          )}
           <div className="col-sm-6">
             <Field label="Date">
               <input className="form-control" type="date" value={form.paidAt} onChange={(e) => setForm({ ...form, paidAt: e.target.value })} />
