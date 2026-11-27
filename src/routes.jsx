@@ -31,7 +31,7 @@ export const routeConfig = [
     layout: AppLayout,
     auth: true,
     children: [
-      { index: true, page: page(() => import('@pages/Dashboard/Dashboard')) },
+      { index: true, page: page(() => import('@pages/Dashboard/Home')) },
       { path: 'notifications', page: page(() => import('@pages/Notifications/Notifications')) },
       { path: 'students', page: page(() => import('@pages/Students/StudentsList')) },
       { path: 'students/new', page: page(() => import('@pages/Students/StudentForm')), roles: CAN.manageStudents },

@@ -14,6 +14,7 @@ const STAFF = [ROLES.ADMIN, ROLES.SECRETARY];
 export const CAN = {
   manageUsers: ADMIN_ONLY,
   manageSettings: ADMIN_ONLY,
+  viewDashboard: ADMIN_ONLY, // school-wide figures (income, debts…): the manager only; others start on Students
   manageCampuses: ADMIN_ONLY,
   managePrograms: STAFF,
   manageBooks: STAFF,

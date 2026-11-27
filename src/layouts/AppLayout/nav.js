@@ -6,7 +6,7 @@ import { CAN } from '@data/roles';
 // Sidebar entries. `roles` hides the entry (the route itself is also guarded in routes.jsx).
 export const NAV = [
   { section: 'Overview' },
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true, roles: CAN.viewDashboard },
   { to: '/notifications', label: 'Notifications', icon: Bell, badge: 'notifications' },
   { section: 'Students' },
   { to: '/students', label: 'Students', icon: Users },

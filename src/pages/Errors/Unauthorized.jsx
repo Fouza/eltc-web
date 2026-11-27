@@ -7,7 +7,7 @@ const Unauthorized = () => (
     icon={ShieldAlert}
     title="You don't have access to this page"
     message="Your role doesn't allow it. Ask the school manager if you need access."
-    action={<Link to="/"><Button variant="soft">Back to dashboard</Button></Link>}
+    action={<Link to="/"><Button variant="soft">Back to home</Button></Link>}
   />
 );
 
