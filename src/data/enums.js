@@ -72,6 +72,8 @@ export const CERTIFICATE_STATUS = {
   handed: { label: 'Handed over', tone: 'green' },
   revoked: { label: 'Revoked', tone: 'red' },
 };
+// Why a session didn't take place. Keep in sync with eltc-api/src/constants/enums.js.
+export const SESSION_CANCEL_REASONS = { holiday: 'Holiday / day off', eid: 'Eid', teacher_absent: 'Teacher absent', other: 'Other' };
 export const CERTIFICATE_RECEIVERS = { student: 'The student', guardian: 'Parent / guardian', other: 'Someone else' };
 export const MENTIONS = [
   { min: 80, label: 'Very good' },

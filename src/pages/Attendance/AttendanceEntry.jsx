@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import dayjs from 'dayjs';
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, ClipboardCheck, Keyboard, Phone, Save, Trash2 } from 'lucide-react';
+import { AlertTriangle, Ban, CalendarX, Check, ChevronLeft, ChevronRight, ClipboardCheck, Keyboard, Phone, Save, Trash2 } from 'lucide-react';
 import { attendanceApi, groupsApi } from '@api/endpoints';
 import { useApi, useCampus, useCan, useGroupName } from '@helpers/hooks';
 import { formatDate, formatDateTime, formatDay, fullName, scheduleLabel, todayInput } from '@helpers/format';
@@ -9,21 +9,29 @@ import { toast } from '@helpers/toast';
 import { useConfirm } from '@context/ConfirmContext';
 import { Avatar, Badge, Button, Card, EmptyState, Field, Loader, PageHeader, Segmented } from '@components';
 import { CAN } from '@data/roles';
-import { ATTENDANCE_STATUS } from '@data/enums';
-import { DAYS_SHORT } from '@data/days';
+import { ATTENDANCE_STATUS, SESSION_CANCEL_REASONS } from '@data/enums';
+import { dayKey, isClassDay, stepClassDay } from '@helpers/sessionDates';
 import styles from './Attendance.module.scss';
 
 const OPTIONS = Object.entries(ATTENDANCE_STATUS).map(([value, s]) => ({ value, label: s.short, title: s.label, tone: s.tone === 'blue' ? 'purple' : s.tone }));
 const KEYS = { p: 'present', a: 'absent', l: 'late', e: 'excused' };
 
-// Nearest past class day of the group (so "today" lands on the last session when there is no class today).
+// The group's dates the sheet can be taken for: from its start to its end, never after today.
+const rangeOf = (group) => {
+  const end = group?.endDate && dayKey(group.endDate) < todayInput() ? dayKey(group.endDate) : todayInput();
+  return { min: group?.startDate ? dayKey(group.startDate) : '', max: end };
+};
+
+// Last class day of the group up to today (or up to its end); its first day when it hasn't started yet.
 const lastSessionDate = (group) => {
-  if (!group?.schedule?.length) return todayInput();
+  const { min, max } = rangeOf(group);
+  if (min && min > max) return min;
   for (let i = 0; i < 7; i++) {
-    const d = dayjs().subtract(i, 'day');
-    if (group.schedule.some((s) => s.day === d.day())) return d.format('YYYY-MM-DD');
+    const k = dayjs(max).subtract(i, 'day').format('YYYY-MM-DD');
+    if (min && k < min) break;
+    if (isClassDay(group, k)) return k;
   }
-  return todayInput();
+  return min || max;
 };
 
 const AttendanceEntry = () => {
@@ -109,9 +117,12 @@ const AttendanceEntry = () => {
     sheet?.entries.forEach((e) => { c[e.status]++; });
     return c;
   }, [sheet]);
-  const isClassDay = group && date && group.schedule.some((s) => s.day === dayjs(date).day());
-  const todays = (groups ?? []).filter((g) => g.status === 'ongoing' && g.schedule.some((s) => s.day === dayjs().day()));
-  const shiftDate = (n) => setDate(dayjs(date).add(n, 'day').format('YYYY-MM-DD'));
+  const range = rangeOf(group);
+  const todays = (groups ?? []).filter((g) => g.status === 'ongoing' && isClassDay(g, todayInput()) && !g.cancelledSessions?.some((c) => dayKey(c.date) === todayInput()));
+  // Arrows jump to the group's previous / next class day, inside its dates.
+  const prevDay = group && date ? stepClassDay(group, date, -1) : null;
+  const nextDay = group && date ? stepClassDay(group, date, 1) : null;
+  const blocked = sheet && !sheet.exists && sheet.noSession; // no class that day: no sheet to fill
 
   return (
     <>
@@ -131,9 +142,9 @@ const AttendanceEntry = () => {
               <div className="col-md-6">
                 <Field label="Date" className="mb-0">
                   <div className="d-flex gap-2">
-                    <Button variant="secondary" icon={ChevronLeft} onClick={() => shiftDate(-1)} disabled={!date} aria-label="Previous day" />
-                    <input type="date" className="form-control" value={date} max={todayInput()} onChange={(e) => setDate(e.target.value)} disabled={!groupId} />
-                    <Button variant="secondary" icon={ChevronRight} onClick={() => shiftDate(1)} disabled={!date || date >= todayInput()} aria-label="Next day" />
+                    <Button variant="secondary" icon={ChevronLeft} onClick={() => setDate(prevDay)} disabled={!prevDay} aria-label="Previous class" />
+                    <input type="date" className="form-control" value={date} min={range.min || undefined} max={range.max} onChange={(e) => e.target.value && setDate(e.target.value)} disabled={!groupId} />
+                    <Button variant="secondary" icon={ChevronRight} onClick={() => setDate(nextDay)} disabled={!nextDay || nextDay > todayInput()} aria-label="Next class" />
                   </div>
                 </Field>
               </div>
@@ -156,14 +167,27 @@ const AttendanceEntry = () => {
             <Card><EmptyState icon={ClipboardCheck} title="Choose a group to start" message="Or pick one of today's classes above." /></Card>
           ) : loading || !sheet ? (
             <Card><Loader /></Card>
+          ) : blocked ? (
+            <Card>
+              <EmptyState
+                icon={sheet.cancelled ? Ban : CalendarX}
+                title={sheet.cancelled ? `Session cancelled — ${SESSION_CANCEL_REASONS[sheet.cancelled.reason]}` : 'No class on this date'}
+                message={sheet.cancelled ? `${sheet.cancelled.note ? `${sheet.cancelled.note}. ` : ''}No attendance is taken for a cancelled session. It can be restored from the timetable.` : sheet.noSession}
+              />
+              <div className="d-flex justify-content-center gap-2 pb-2">
+                {prevDay && <Button variant="secondary" icon={ChevronLeft} onClick={() => setDate(prevDay)}>Previous class</Button>}
+                {nextDay && nextDay <= todayInput() && <Button variant="secondary" icon={ChevronRight} onClick={() => setDate(nextDay)}>Next class</Button>}
+                {sheet.cancelled && <Link to={`/timetable?week=${dayjs(date).subtract((dayjs(date).day() + 1) % 7, 'day').format('YYYY-MM-DD')}`}><Button variant="ghost">Open the timetable</Button></Link>}
+              </div>
+            </Card>
           ) : (
             <Card
               padded={false}
               title={`${group?.name ?? ''} · ${formatDate(date)}`}
               subtitle={
                 sheet.exists
-                  ? `Saved by ${fullName(sheet.recordedBy)} · ${formatDateTime(sheet.updatedAt)}${dirty ? ' · unsaved changes' : ''}`
-                  : isClassDay ? 'Not recorded yet' : `⚠ No class on ${DAYS_SHORT[dayjs(date).day()]} for this group — check the date`
+                  ? `Saved by ${fullName(sheet.recordedBy)} · ${formatDateTime(sheet.updatedAt)}${dirty ? ' · unsaved changes' : ''}${sheet.noSession ? ` · ⚠ ${sheet.noSession}` : ''}`
+                  : 'Not recorded yet'
               }
               actions={canEdit && (
                 <>

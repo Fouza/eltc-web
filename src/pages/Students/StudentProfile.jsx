@@ -10,6 +10,7 @@ import { toast } from '@helpers/toast';
 import { useConfirm } from '@context/ConfirmContext';
 import { Avatar, Badge, Button, Card, Dropdown, EmptyState, Field, Loader, Modal, PageHeader, StatusBadge, Tabs } from '@components';
 import { CAN } from '@data/roles';
+import { preferredTimeLabel } from '@data/sessions';
 import { ATTENDANCE_STATUS, CERTIFICATE_STATUS, ENROLLMENT_STATUS, EXAM_TYPES, FINAL_RESULTS, INVOICE_STATUS, PAYMENT_METHODS, STUDENT_STATUS } from '@data/enums';
 import RecordPaymentModal from '@pages/Payments/RecordPaymentModal';
 import InvoiceFormModal from '@pages/Payments/InvoiceFormModal';
@@ -110,6 +111,7 @@ const StudentProfile = () => {
               {s.birthDate && <span>{age(s.birthDate)} years old</span>}
               <span><MapPin size={14} /> {s.campus?.name}</span>
               {(s.phone || s.guardian?.phone) && <a href={`tel:${s.phone ?? s.guardian.phone}`}><Phone size={14} /> {s.phone ?? `${s.guardian.phone} (${s.guardian.relation ?? 'guardian'})`}</a>}
+              {s.phone2 && <a href={`tel:${s.phone2}`}><Phone size={14} /> {s.phone2}</a>}
               {s.email && <a href={`mailto:${s.email}`}><Mail size={14} /> {s.email}</a>}
             </div>
           </div>
@@ -306,6 +308,7 @@ const StudentProfile = () => {
               <InfoRow label="Place of birth">{s.birthPlace}</InfoRow>
               <InfoRow label="Occupation">{s.occupation}</InfoRow>
               <InfoRow label="Phone">{s.phone}</InfoRow>
+              <InfoRow label="Phone 2">{s.phone2}</InfoRow>
               <InfoRow label="Email">{s.email}</InfoRow>
               <InfoRow label="Address">{[s.address, s.city].filter(Boolean).join(', ')}</InfoRow>
             </Card>
@@ -320,7 +323,7 @@ const StudentProfile = () => {
               <InfoRow label="Registered">{formatDate(s.registeredAt)} {s.createdBy && `by ${fullName(s.createdBy)}`}</InfoRow>
               <InfoRow label="Source">{s.source}</InfoRow>
               <InfoRow label="Wanted">{s.desiredProgram && `${s.desiredProgram.name}${s.desiredLevel ? ` · ${levelName(s.desiredLevel, s.desiredProgram)}` : ''}`}</InfoRow>
-              <InfoRow label="Preferred times">{s.preferredSlots}</InfoRow>
+              <InfoRow label="Preferred time">{preferredTimeLabel(s.preferredTime) ?? s.preferredSlots ?? (s.status === 'prospect' ? 'Any time' : null)}</InfoRow>
               <InfoRow label="Notes">{s.notes}</InfoRow>
             </Card>
           </div>

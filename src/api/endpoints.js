@@ -48,6 +48,8 @@ export const groupsApi = {
   ...crud('/groups'),
   attendance: (id) => api.get(`/groups/${id}/attendance`),
   promote: (id, data) => api.post(`/groups/${id}/promote`, data),
+  cancelSession: (id, data) => api.post(`/groups/${id}/cancellations`, data),
+  restoreSession: (id, date) => api.delete(`/groups/${id}/cancellations/${date}`),
 };
 
 export const studentsApi = {

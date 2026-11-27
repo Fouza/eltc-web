@@ -8,11 +8,12 @@ import { age, fullName, toInputDate, todayInput } from '@helpers/format';
 import { toast } from '@helpers/toast';
 import { Button, Card, Field, Loader, PageHeader } from '@components';
 import { SOURCES, STUDENT_STATUS } from '@data/enums';
+import { preferredTimesFor } from '@data/sessions';
 
 const EMPTY = {
-  firstName: '', lastName: '', gender: '', birthDate: '', birthPlace: '', phone: '', email: '', address: '', city: '', occupation: '',
+  firstName: '', lastName: '', gender: '', birthDate: '', birthPlace: '', phone: '', phone2: '', email: '', address: '', city: '', occupation: '',
   guardian: { name: '', relation: '', phone: '', email: '' },
-  campus: '', status: 'prospect', registeredAt: todayInput(), desiredProgram: '', desiredLevel: '', preferredSlots: '', source: '', notes: '',
+  campus: '', status: 'prospect', registeredAt: todayInput(), desiredProgram: '', desiredLevel: '', preferredTime: '', source: '', notes: '',
 };
 
 // Same sections as the paper registration form, so typing it is quick.
@@ -36,6 +37,7 @@ const StudentForm = () => {
         campus: s.campus?._id ?? '',
         desiredProgram: s.desiredProgram?._id ?? '',
         desiredLevel: s.desiredLevel ?? '',
+        preferredTime: s.preferredTime ?? '',
         birthDate: toInputDate(s.birthDate),
         registeredAt: toInputDate(s.registeredAt),
       });
@@ -53,7 +55,7 @@ const StudentForm = () => {
     if (!values.firstName.trim()) errs.firstName = 'Required';
     if (!values.lastName.trim()) errs.lastName = 'Required';
     if (!values.campus) errs.campus = 'Required';
-    if (!values.phone && !values.guardian.phone) errs.phone = 'Give at least one phone number (student or guardian)';
+    if (!values.phone && !values.phone2 && !values.guardian.phone) errs.phone = 'Give at least one phone number (student or guardian)';
     setErrors(errs);
     if (Object.keys(errs).length) return;
     setSaving(true);
@@ -61,6 +63,7 @@ const StudentForm = () => {
       const { _id, studentNumber, createdBy, createdAt, updatedAt, __v, ...data } = values;
       const payload = compact({ ...data, desiredLevel: values.desiredLevel ? Number(values.desiredLevel) : '' });
       if (!values.desiredProgram) payload.desiredProgram = null;
+      if (!values.preferredTime) payload.preferredTime = null;
       const saved = id ? await studentsApi.update(id, payload) : await studentsApi.create(payload);
       toast.success(id ? 'Student updated' : `${fullName(saved)} registered`, saved.studentNumber);
       navigate(`/students/${saved._id}${enrollAfter ? '?enroll=1' : ''}`);
@@ -107,7 +110,8 @@ const StudentForm = () => {
           </Card>
           <Card title="Contact" icon={Contact} className="mb-3">
             <div className="row">
-              <div className="col-sm-6"><Field label="Phone" error={errors.phone}><input className="form-control" type="tel" {...bind('phone')} placeholder="+213 …" /></Field></div>
+              <div className="col-sm-6"><Field label="Phone" error={errors.phone}><input className="form-control" type="tel" {...bind('phone')} placeholder="0550 …" /></Field></div>
+              <div className="col-sm-6"><Field label="Phone 2" hint="Another number (e.g. the other parent)"><input className="form-control" type="tel" {...bind('phone2')} placeholder="0661 …" /></Field></div>
               <div className="col-sm-6"><Field label="Email"><input className="form-control" type="email" {...bind('email')} /></Field></div>
               <div className="col-sm-8"><Field label="Address"><input className="form-control" {...bind('address')} /></Field></div>
               <div className="col-sm-4"><Field label="City / district"><input className="form-control" {...bind('city')} /></Field></div>
@@ -150,7 +154,17 @@ const StudentForm = () => {
           </Card>
           <Card title="Wanted course" subtitle="Puts the student on the waiting list until enrolled" icon={BookOpen} className="mb-3">
             <Field label="Program">
-              <select className="form-select" value={values.desiredProgram} onChange={(e) => { set('desiredProgram', e.target.value); set('desiredLevel', ''); }}>
+              <select
+                className="form-select"
+                value={values.desiredProgram}
+                onChange={(e) => {
+                  const next = programs.find((p) => p._id === e.target.value);
+                  set('desiredProgram', e.target.value);
+                  set('desiredLevel', '');
+                  // A kids session doesn't fit an adults course (and the other way round).
+                  if (next && !preferredTimesFor(next.audience).some((t) => t.key === values.preferredTime)) set('preferredTime', '');
+                }}
+              >
                 <option value="">—</option>
                 {programs.filter((p) => p.active).map((p) => <option key={p._id} value={p._id}>{p.name}</option>)}
               </select>
@@ -163,7 +177,20 @@ const StudentForm = () => {
                 </select>
               </Field>
             )}
-            <Field label="Preferred times"><input className="form-control" {...bind('preferredSlots')} placeholder="Weekday evenings, Saturday…" /></Field>
+            <Field label="Preferred time" hint={values.preferredSlots && !values.preferredTime ? `Written before: "${values.preferredSlots}"` : 'The waiting list groups students by the time they want'}>
+              <select className="form-select" {...bind('preferredTime')}>
+                <option value="">Any time</option>
+                {program ? (
+                  preferredTimesFor(program.audience).map((t) => <option key={t.key} value={t.key}>{t.label} · {t.detail}</option>)
+                ) : (
+                  [['adults', 'Adults'], ['children', 'Kids']].map(([a, label]) => (
+                    <optgroup key={a} label={label}>
+                      {preferredTimesFor(a).map((t) => <option key={t.key} value={t.key}>{t.label} · {t.detail}</option>)}
+                    </optgroup>
+                  ))
+                )}
+              </select>
+            </Field>
           </Card>
           <Card title="Notes">
             <textarea className="form-control" rows={4} {...bind('notes')} placeholder="Anything useful: allergies, special needs, payment arrangement…" />

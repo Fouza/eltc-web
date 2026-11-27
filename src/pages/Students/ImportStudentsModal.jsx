@@ -11,6 +11,7 @@ const FIELDS = [
   ['firstName', 'First name', ['prenom', 'prénom', 'first name', 'firstname']],
   ['lastName', 'Last name', ['nom', 'last name', 'lastname', 'surname']],
   ['phone', 'Phone', ['telephone', 'téléphone', 'tel', 'tél', 'tél.', 'phone', 'mobile', 'portable']],
+  ['phone2', 'Phone 2', ['phone 2', 'telephone 2', 'téléphone 2', 'tel 2', 'tél 2', 'mobile 2', 'phone2']],
   ['email', 'Email', ['email', 'mail', 'e-mail']],
   ['birthDate', 'Birth date (YYYY-MM-DD)', ['date de naissance', 'birth date', 'birthdate', 'naissance']],
   ['birthPlace', 'Place of birth', ['lieu de naissance', 'lieu naissance', 'place of birth', 'birthplace', 'birth place', 'né à', 'née à', 'né(e) à']],

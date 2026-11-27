@@ -52,3 +52,21 @@ export const scheduleFromSessions = (keys = []) =>
     const { day, startTime, endTime } = SESSIONS.find((s) => s.key === k);
     return { day, startTime, endTime };
   });
+
+// Waiting list: the time a student asks for. Kids: one session (sat_am…). Adults: one schedule (weekend_am, weekend_pm, evening).
+// Empty = any time.
+export const PREFERRED_TIME_KEYS = [...sessionsFor('children').map((s) => s.key), ...ADULT_SCHEDULES.map((p) => p.key)];
+
+export const preferredTimesFor = (audience) =>
+  audience === 'children'
+    ? sessionsFor('children').map((s) => ({ key: s.key, label: s.label, detail: `${s.startTime}–${s.endTime}` }))
+    : ADULT_SCHEDULES.map((p) => ({
+      key: p.key,
+      label: p.label,
+      detail: p.sessions.map((k) => SESSIONS.find((s) => s.key === k)).map((s) => `${s.label.replace(/^Evening /, '')} ${s.startTime}–${s.endTime}`).join(' · '),
+    }));
+
+export const preferredTimeLabel = (key) => ADULT_SCHEDULES.find((p) => p.key === key)?.label ?? SESSIONS.find((s) => s.key === key)?.label ?? null;
+
+// The group sessions matching a preferred time (to open a group from the waiting list).
+export const sessionsOfPreferredTime = (key) => ADULT_SCHEDULES.find((p) => p.key === key)?.sessions ?? (SESSION_KEYS.includes(key) ? [key] : []);

@@ -45,6 +45,7 @@ const StudentsList = () => {
         { label: 'First name', value: (s) => s.firstName },
         { label: 'Last name', value: (s) => s.lastName },
         { label: 'Phone', value: (s) => s.phone },
+        { label: 'Phone 2', value: (s) => s.phone2 },
         { label: 'Guardian phone', value: (s) => s.guardian?.phone },
         { label: 'Email', value: (s) => s.email },
         { label: 'Birth date', value: (s) => (s.birthDate ? dayjs(s.birthDate).format('YYYY-MM-DD') : '') },
@@ -117,7 +118,8 @@ const StudentsList = () => {
                         </div>
                       </td>
                       <td>
-                        <div>{s.phone ?? s.guardian?.phone ?? '—'}</div>
+                        <div>{s.phone ?? s.phone2 ?? s.guardian?.phone ?? '—'}</div>
+                        {s.phone && s.phone2 && <div className="fs-12 fg-subtle">{s.phone2}</div>}
                         {!s.phone && s.guardian?.name && <div className="fs-12 fg-subtle">{s.guardian.relation ?? 'Guardian'}: {s.guardian.name}</div>}
                       </td>
                       <td><Badge color={s.campus?.color}>{s.campus?.code}</Badge></td>

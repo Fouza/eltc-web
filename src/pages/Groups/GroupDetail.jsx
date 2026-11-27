@@ -155,6 +155,7 @@ const GroupDetail = () => {
             </div>
             <ProgressBar value={g.enrolledCount} max={g.capacity} height={8} />
             <div className="d-flex justify-content-between mt-3 fs-13"><span className="fg-muted">Sessions held</span><b>{g.sessionsHeld}</b></div>
+            {g.cancelledSessions?.length > 0 && <div className="d-flex justify-content-between mt-1 fs-13"><span className="fg-muted">Cancelled sessions</span><b>{g.cancelledSessions.length}</b></div>}
             <div className="d-flex justify-content-between mt-1 fs-13"><span className="fg-muted">Average attendance</span><b>{percent(stats.attendance)}</b></div>
             {canFinance && <div className="d-flex justify-content-between mt-1 fs-13"><span className="fg-muted">Left to collect</span><b className={stats.overdue ? 'fg-red' : ''}>{money(stats.due)}</b></div>}
           </Card>

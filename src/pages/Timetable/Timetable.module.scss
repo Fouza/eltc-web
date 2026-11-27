@@ -21,3 +21,16 @@
   span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.85; }
   &:hover { filter: brightness(0.97); z-index: 2; box-shadow: $shadow; }
 }
+.date { display: block; font-weight: 500; font-size: 11.5px; color: $subtle; margin-top: 1px; }
+.today .date { color: $blue; }
+.cancelled {
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 6%, var(--surface)) 0 6px, var(--surface) 6px 12px);
+  border-left-style: dashed; opacity: 0.75;
+  b { text-decoration: line-through; }
+}
+.cancelledBox { border: 1px dashed $line; border-radius: 10px; padding: 12px 14px; }
+.reason {
+  border: 1px solid $line; border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; user-select: none;
+  &:hover { border-color: $blue; }
+}
+.reasonOn { border-color: $blue; background: color-mix(in srgb, var(--blue) 10%, transparent); color: $blue; font-weight: 600; }

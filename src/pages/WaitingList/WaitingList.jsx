@@ -1,17 +1,27 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
+import { useSelector } from 'react-redux';
 import { Hourglass, Phone, Plus, UserPlus } from 'lucide-react';
 import { studentsApi } from '@api/endpoints';
 import { useApi, useCampus, useCan } from '@helpers/hooks';
 import { fromNow, fullName, levelName } from '@helpers/format';
-import { Avatar, Badge, Button, Card, EmptyState, Loader, PageHeader } from '@components';
+import { Avatar, Badge, Button, Card, EmptyState, Loader, PageHeader, Segmented } from '@components';
 import { CAN } from '@data/roles';
 import { AUDIENCES } from '@data/enums';
-import GroupFormModal from '@pages/Groups/GroupFormModal';
+import { preferredTimeLabel, sessionsOfPreferredTime } from '@data/sessions';
+import GroupFormModal, { suggestName } from '@pages/Groups/GroupFormModal';
 import EnrollModal from '@pages/Students/EnrollModal';
 
+const MODE_KEY = 'eltc.waitingList.mode';
+const readMode = () => { try { return localStorage.getItem(MODE_KEY) ?? 'time'; } catch { return 'time'; } };
+const timeOf = (s) => preferredTimeLabel(s.preferredTime) ?? 'Any time';
+
 // Prospects grouped by what they asked for: tells the school when there are enough people to open a group.
+// "By time" splits each course by the time the students want (kids session or adults schedule); "Any time" is its own list.
 const WaitingList = () => {
+  const programs = useSelector((st) => st.refs.programs);
+  const [mode, setModeState] = useState(readMode);
+  const setMode = (m) => { setModeState(m); try { localStorage.setItem(MODE_KEY, m); } catch { /* private mode */ } };
   const campus = useCampus();
   const canGroup = useCan(CAN.manageGroups);
   const canEnroll = useCan(CAN.manageEnrollments);
@@ -19,17 +29,37 @@ const WaitingList = () => {
   const [enrolling, setEnrolling] = useState(null);
   const { data, loading, reload } = useApi(() => studentsApi.waitingList({ campus }), [campus]);
   const total = data?.reduce((s, b) => s + b.students.length, 0) ?? 0;
+  const buckets = useMemo(() => {
+    if (mode !== 'time') return data ?? [];
+    const out = [];
+    for (const b of data ?? []) {
+      const byTime = new Map();
+      for (const st of b.students) byTime.set(st.preferredTime ?? '', [...(byTime.get(st.preferredTime ?? '') ?? []), st]);
+      for (const [time, students] of byTime) out.push({ ...b, key: `${b.key}-${time}`, time: time || null, students });
+    }
+    return out.sort((a, b) => b.students.length - a.students.length);
+  }, [data, mode]);
+  const openGroup = (b) => {
+    const program = programs.find((p) => p._id === b.program._id);
+    const sessions = b.time ? sessionsOfPreferredTime(b.time) : [];
+    setCreating({ program: b.program._id, levelNumber: b.levelNumber ?? 1, campus: b.campus?._id, sessions, name: sessions.length ? suggestName(program, b.levelNumber ?? 1, sessions) : '' });
+  };
 
   return (
     <>
       <PageHeader
         title="Waiting list"
-        subtitle={`${total} registered students not placed in a group yet, grouped by the course they want.`}
-        actions={<Link to="/students/new"><Button icon={Plus}>Register a student</Button></Link>}
+        subtitle={`${total} registered students not placed in a group yet, grouped by the course${mode === 'time' ? ' and time' : ''} they want.`}
+        actions={
+          <div className="d-flex gap-2 align-items-center flex-wrap">
+            <Segmented options={[{ value: 'time', label: 'By course & time' }, { value: 'course', label: 'By course' }]} value={mode} onChange={setMode} />
+            <Link to="/students/new"><Button icon={Plus}>Register a student</Button></Link>
+          </div>
+        }
       />
-      {loading && !data ? <Loader /> : data?.length ? (
+      {loading && !data ? <Loader /> : buckets.length ? (
         <div className="row g-3">
-          {data.map((b) => (
+          {buckets.map((b) => (
             <div key={b.key} className="col-xl-4 col-md-6">
               <Card
                 className="h-100"
@@ -37,6 +67,7 @@ const WaitingList = () => {
                 subtitle={
                   <span className="d-flex gap-1 mt-1 flex-wrap">
                     {b.levelNumber && <Badge tone="purple">{levelName(b.levelNumber, b.program)}</Badge>}
+                    {mode === 'time' && <Badge tone={b.time ? 'blue' : 'gray'}>{b.time ? preferredTimeLabel(b.time) : 'Any time'}</Badge>}
                     <Badge color={b.campus?.color}>{b.campus?.name}</Badge>
                     {b.program && <Badge tone="gray">{AUDIENCES[b.program.audience]}</Badge>}
                   </span>
@@ -49,7 +80,7 @@ const WaitingList = () => {
                       <Avatar person={s} size={30} />
                       <div className="flex-grow-1 min-w-0">
                         <Link to={`/students/${s._id}`} className="fw-600 fg-ink">{fullName(s)}</Link>
-                        <div className="fs-12 fg-subtle text-ellipsis">{s.preferredSlots ?? '—'} · {fromNow(s.registeredAt)}</div>
+                        <div className="fs-12 fg-subtle text-ellipsis">{mode === 'course' ? `${timeOf(s)} · ` : ''}{fromNow(s.registeredAt)}</div>
                       </div>
                       {s.phone && <a href={`tel:${s.phone}`} title={s.phone}><Button size="sm" variant="ghost" icon={Phone} /></a>}
                       {canEnroll && <Button size="sm" variant="soft" icon={UserPlus} title="Enroll" onClick={() => setEnrolling(s)} />}
@@ -63,7 +94,7 @@ const WaitingList = () => {
                     block
                     className="mt-3"
                     icon={Plus}
-                    onClick={() => setCreating({ program: b.program._id, levelNumber: b.levelNumber ?? 1, campus: b.campus?._id })}
+                    onClick={() => openGroup(b)}
                   >
                     Open a group{b.students.length >= 5 ? ' — enough students!' : ''}
                   </Button>
